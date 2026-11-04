@@ -3,7 +3,7 @@
 // The three repositories stay the single source of their pages; this
 // script only selects, adds Starlight front matter where a page has none,
 // and rewrites links: links between copied pages become site links, other
-// relative links point at the file on Codeberg. The ELMOS command reference
+// relative links point at the file on GitHub. The ELMOS command reference
 // is generated from the code (elmos gendocs).
 //
 // Sources: sibling checkouts (../haven, ../haven-wiki, ../elmos, ../kdal) or
@@ -16,7 +16,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..")
 const SRC = path.resolve(process.env.SRC_ROOT ?? path.join(ROOT, ".."));
 const OUT = path.join(ROOT, "src", "content", "docs");
 const BASE = (process.env.DOCS_BASE ?? "/docs").replace(/\/$/, "");
-const OWNER = "https://codeberg.org/NguyenTrongPhuc552003";
+const OWNER = "https://github.com/NguyenTrongPhuc552003";
 
 // [repo, source path (file or dir), site dir or file]
 const MAP = [
@@ -96,7 +96,7 @@ function rewriteLinks(text, file, repo) {
     const rel = path.relative(repoRoot, abs);
     if (rel.startsWith("..")) return all;
     const kind = /\.(png|jpe?g|gif|svg|webp)$/i.test(rel) ? "raw" : "src";
-    return `](${OWNER}/${repo}/${kind}/branch/main/${rel}${hash}${title})`;
+    return `](${OWNER}/${repo}/${kind === "raw" ? "raw" : "blob"}/main/${rel}${hash}${title})`;
   });
 }
 

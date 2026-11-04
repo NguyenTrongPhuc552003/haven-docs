@@ -15,7 +15,7 @@ Needs `qemu-system-aarch64` (9.2 or later), `python3` and `dtc`
 `sudo apt install qemu-system-arm python3 device-tree-compiler`).
 
 Download `haven-try-*.tar.gz` from the
-[HAVEN try release](https://codeberg.org/NguyenTrongPhuc552003/haven/releases/tag/try-20261103),
+[HAVEN try release](https://github.com/NguyenTrongPhuc552003/haven/releases/tag/try-20261103),
 then:
 
 ```sh

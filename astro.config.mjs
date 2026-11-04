@@ -5,7 +5,7 @@ import { defineConfig, passthroughImageService } from "astro/config";
 import starlight from "@astrojs/starlight";
 import starlightSidebarTopics from "starlight-sidebar-topics";
 
-const SITE = process.env.DOCS_SITE ?? "https://nguyentrongphuc552003.codeberg.page";
+const SITE = process.env.DOCS_SITE ?? "https://nguyentrongphuc552003.github.io";
 const BASE = process.env.DOCS_BASE ?? "/docs";
 
 export default defineConfig({
@@ -19,7 +19,7 @@ export default defineConfig({
       description:
         "An ARM64 static-partitioning hypervisor with enforcement read-back, a macOS embedded-Linux workbench, and a device abstraction layer: documentation.",
       social: [
-        { icon: "codeberg", label: "Codeberg", href: "https://codeberg.org/NguyenTrongPhuc552003" },
+        { icon: "github", label: "GitHub", href: "https://github.com/NguyenTrongPhuc552003" },
       ],
       plugins: [
         starlightSidebarTopics([

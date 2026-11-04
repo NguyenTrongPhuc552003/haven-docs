@@ -1,0 +1,68 @@
+# Build the site from the three project repositories and deploy it to
+# GitHub Pages (Settings > Pages > Source: GitHub Actions).
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *" # nightly, to pick up documentation changes in the projects
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: docs
+      - uses: actions/checkout@v4
+        with:
+          repository: NguyenTrongPhuc552003/haven
+          path: haven
+      - uses: actions/checkout@v4
+        with:
+          repository: NguyenTrongPhuc552003/haven-wiki
+          path: haven-wiki
+      - uses: actions/checkout@v4
+        with:
+          repository: NguyenTrongPhuc552003/elmos
+          path: elmos
+      - uses: actions/checkout@v4
+        with:
+          repository: NguyenTrongPhuc552003/kdal
+          path: kdal
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: elmos/go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build
+        working-directory: docs
+        run: |
+          npm ci
+          npm run build
+          node scripts/check-links.mjs
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

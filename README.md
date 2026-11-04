@@ -15,8 +15,9 @@ npm run preview      # http://localhost:4321/docs/
 
 `SRC_ROOT` points the sync at other checkouts; `DOCS_SITE` and
 `DOCS_BASE` set the published address (default
-`https://nguyentrongphuc552003.codeberg.page/docs/`, Codeberg Pages from
-the `pages` branch of this repository).
+`https://nguyentrongphuc552003.github.io/docs/`, GitHub Pages, deployed by
+`.github/workflows/pages.yml` on every push to `main`; the workflow checks
+out the three project repositories next to this one).
 
 Hand-written pages are only the ones under `src/content/docs/` that are
 tracked here (`index.mdx`, `start/`). The `haven/`, `elmos/` and `kdal/`
