@@ -1,0 +1,35 @@
+---
+title: HAVEN, ELMOS and KDAL
+description: Documentation for an ARM64 static-partitioning hypervisor with enforcement read-back, a macOS embedded-Linux workbench and a device abstraction layer.
+template: splash
+hero:
+  tagline: Three projects from one Master's thesis, usable one by one or together. Try them in QEMU first; no board needed.
+  actions:
+    - text: Try it in two minutes
+      link: start/quick-start/
+      icon: right-arrow
+    - text: How the three fit together
+      link: start/ecosystem/
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid>
+  <Card title="HAVEN" icon="seti:lock">
+    A small static-partitioning hypervisor for ARM64 (EL2). Each partition
+    gets its own memory, devices, interrupts and CPU time. A separate tool
+    reads back what the hardware actually enforces (stage-2 tables, SMMU,
+    GIC) and compares it with the grant. [HAVEN docs](haven/)
+  </Card>
+  <Card title="ELMOS" icon="laptop">
+    A command-line workbench for embedded Linux on macOS: kernel, modules,
+    apps, root file systems from container images, QEMU, and HAVEN.
+    [ELMOS docs](elmos/)
+  </Card>
+  <Card title="KDAL" icon="puzzle">
+    A Linux kernel module that gives drivers one device model and reports
+    what hardware they need, in the same vocabulary as HAVEN's grants.
+    [KDAL docs](kdal/)
+  </Card>
+</CardGrid>
