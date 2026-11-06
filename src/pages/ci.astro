@@ -1,0 +1,368 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+const repos = ["haven", "elmos", "kdal"];
+const gh = "https://github.com/NguyenTrongPhuc552003";
+---
+
+<SiteLayout
+	title="CI status: HAVEN, ELMOS and KDAL"
+	description="Live GitHub Actions status for the haven, elmos and kdal repositories: latest runs, pass rate, run time, job matrix across Linux, Windows and macOS, and runner wait times."
+	active="ci"
+>
+	<section class="section ci-head">
+		<div class="wrap">
+			<p class="eyebrow">Continuous integration</p>
+			<h1 class="section-title">CI status</h1>
+			<p class="lead">The <code>ci</code> workflow of each repository on <code>main</code>: the last 30 runs, read live from GitHub's API in your browser.</p>
+			<div class="toolbar">
+				<span class="muted small" id="ci-updated">Loading…</span>
+				<button type="button" class="btn" id="ci-refresh">Refresh</button>
+			</div>
+			<p class="muted small" id="ci-error" hidden></p>
+		</div>
+	</section>
+
+	<section class="wrap">
+		<h2 class="h2">Overview</h2>
+		<div class="grid grid-3" id="ci-overview">
+			{repos.map((r) => (
+				<article class="card tile" data-repo={r}>
+					<div class="tile-head"><a class="repo" href={`#${r}`}>{r}</a><span class="tile-state"></span></div>
+					<dl class="stats">
+						<div><dt>Pass rate</dt><dd class="s-rate">–</dd></div>
+						<div><dt>Median time</dt><dd class="s-med">–</dd></div>
+						<div><dt>Latest</dt><dd class="s-last">–</dd></div>
+					</dl>
+				</article>
+			))}
+		</div>
+
+		<h2 class="h2">Latest run, job by job</h2>
+		<p class="muted small">From the push to the result: each job of the newest run, with its runner's operating system.</p>
+		<div class="card flow-card"><div id="ci-flow" class="flow"></div></div>
+	</section>
+
+	{repos.map((r) => (
+		<section class="wrap repo-section" id={r} data-repo={r}>
+			<div class="repo-head">
+				<h2 class="h2"><span class="mono">{r}</span></h2>
+				<a class="small" href={`${gh}/${r}/actions/workflows/ci.yml`}>All runs on GitHub →</a>
+			</div>
+			<div class="grid grid-2">
+				<div class="card">
+					<h3 class="h3">Run history</h3>
+					<p class="muted small">Oldest left, newest right. Select a square to open the run.</p>
+					<div class="history" data-part="history"></div>
+					<div class="legend small" aria-hidden="true">
+						<span><i class="st-swatch st-good"></i>✓ Passed</span>
+						<span><i class="st-swatch st-critical"></i>✕ Failed</span>
+						<span><i class="st-swatch st-warn"></i>◐ Running</span>
+						<span><i class="st-swatch st-neutral"></i>⊘ Cancelled</span>
+					</div>
+				</div>
+				<div class="card">
+					<h3 class="h3">Run time per run (minutes)</h3>
+					<p class="muted small">Start of the run to its last update.</p>
+					<div class="chart" data-part="duration"></div>
+				</div>
+			</div>
+			<div class="card">
+				<div class="repo-head">
+					<h3 class="h3">Jobs of the latest run</h3>
+					<div class="legend small" aria-hidden="true">
+						<span><i class="swatch s2"></i>Waiting for a runner</span>
+						<span><i class="swatch s1"></i>Running</span>
+					</div>
+				</div>
+				<div data-part="jobs"></div>
+			</div>
+			<details class="data-table">
+				<summary class="small">Show the data as a table</summary>
+				<div data-part="table"></div>
+			</details>
+		</section>
+	))}
+
+	<section class="wrap">
+		<p class="muted small notes">
+			Pass rate counts finished runs that passed out of those that passed or failed; cancelled and skipped runs are left out.
+			Run time is a run's start to its last update, so a re-run counts its last attempt. Waiting time is the time from a job's creation to a runner picking it up.
+			The page reads GitHub's public API without a token (60 requests an hour per visitor) and keeps answers for five minutes.
+		</p>
+	</section>
+
+	<div class="tip" id="ci-tip" role="tooltip" hidden></div>
+</SiteLayout>
+
+<style is:global>
+	.ci-head {
+		padding-bottom: 1.5rem;
+	}
+	.toolbar {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		margin-top: 1rem;
+	}
+	.h2 {
+		font-size: 1.35rem;
+		margin: 2.5rem 0 1rem;
+	}
+	.h3 {
+		font-size: 1rem;
+		margin: 0 0 0.25rem;
+	}
+	.mono,
+	.repo {
+		font-family: var(--hv-mono);
+	}
+	.tile-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.repo {
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--hv-heading);
+	}
+	.stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 0.5rem;
+		margin: 1.25rem 0 0;
+	}
+	.stats dt {
+		font-size: 0.75rem;
+		color: var(--hv-muted);
+	}
+	.stats dd {
+		margin: 0.15rem 0 0;
+		font-size: 1.35rem;
+		font-weight: 650;
+		color: var(--hv-heading);
+		white-space: nowrap;
+	}
+	.stats dd small {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--hv-muted);
+	}
+	.flow-card {
+		overflow-x: auto;
+	}
+	.flow svg {
+		min-width: 760px; /* scroll sideways on phones instead of shrinking */
+	}
+	.repo-section {
+		scroll-margin-top: 4.5rem;
+	}
+	.repo-section .card {
+		margin-bottom: 1rem;
+	}
+	.repo-section .grid {
+		margin-bottom: 0;
+	}
+	.repo-head {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.75rem;
+	}
+	.history {
+		display: grid;
+		grid-template-columns: repeat(30, 1fr);
+		gap: 3px;
+		margin: 0.75rem 0;
+	}
+	.history a {
+		aspect-ratio: 1;
+		border-radius: 4px;
+		background: var(--st);
+		min-width: 6px;
+	}
+	.history a:hover,
+	.history a:focus-visible {
+		outline: 2px solid var(--hv-heading);
+		outline-offset: 1px;
+	}
+	.legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.9rem;
+		color: var(--hv-muted);
+	}
+	.legend span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+	}
+	.st-swatch,
+	.swatch {
+		display: inline-block;
+		width: 0.7rem;
+		height: 0.7rem;
+		border-radius: 3px;
+	}
+	.swatch.s1 {
+		background: var(--viz-series-1);
+	}
+	.swatch.s2 {
+		background: var(--viz-series-2);
+	}
+	.chart svg,
+	.flow svg {
+		display: block;
+		width: 100%;
+		height: auto;
+		font-family: var(--hv-font);
+	}
+	.viz-grid {
+		stroke: var(--viz-grid);
+		stroke-width: 1;
+	}
+	.viz-axis {
+		stroke: var(--viz-axis);
+		stroke-width: 1;
+	}
+	.viz-tick {
+		fill: var(--viz-muted);
+		font-size: 11px;
+	}
+	.viz-line {
+		fill: none;
+		stroke: var(--viz-series-1);
+		stroke-width: 2;
+		stroke-linejoin: round;
+	}
+	.viz-dot {
+		fill: var(--viz-series-1);
+		stroke: var(--viz-surface);
+		stroke-width: 2;
+	}
+	.viz-cross {
+		stroke: var(--viz-muted);
+		stroke-dasharray: 3 3;
+	}
+	.viz-hit {
+		fill: transparent;
+	}
+	.job-row {
+		display: grid;
+		grid-template-columns: minmax(10rem, 16rem) 7.5rem 1fr 6.5rem;
+		gap: 0.75rem;
+		align-items: center;
+		padding: 0.55rem 0;
+		font-size: 0.875rem;
+	}
+	.job-row + .job-row {
+		border-top: 1px solid var(--hv-border);
+	}
+	.job-name {
+		color: var(--hv-heading);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.job-bar {
+		display: flex;
+		gap: 2px;
+		height: 12px;
+	}
+	.job-bar span {
+		border-radius: 3px;
+		min-width: 2px;
+	}
+	.job-bar .q {
+		background: var(--viz-series-2);
+	}
+	.job-bar .r {
+		background: var(--viz-series-1);
+	}
+	.job-time {
+		text-align: right;
+		color: var(--hv-muted);
+		font-variant-numeric: tabular-nums;
+	}
+	@media (max-width: 48rem) {
+		.job-row {
+			grid-template-columns: 1fr auto;
+		}
+		.job-bar {
+			grid-column: 1 / -1;
+		}
+	}
+	.flow-node rect {
+		fill: var(--hv-elevated);
+		stroke: var(--hv-border);
+	}
+	.flow-node .bar {
+		stroke: none;
+	}
+	.flow-node text {
+		fill: var(--hv-heading);
+		font-size: 12px;
+	}
+	.flow-node .sub {
+		fill: var(--hv-muted);
+		font-size: 11px;
+	}
+	.flow-link {
+		fill: none;
+		stroke: var(--hv-border);
+		stroke-width: 1.5;
+	}
+	.flow-repo {
+		fill: var(--hv-heading);
+		font-family: var(--hv-mono);
+		font-weight: 700;
+		font-size: 13px;
+	}
+	.data-table {
+		margin-bottom: 2rem;
+	}
+	.data-table summary {
+		cursor: pointer;
+		color: var(--hv-link);
+	}
+	.data-table table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.8125rem;
+		margin-top: 0.75rem;
+	}
+	.data-table th,
+	.data-table td {
+		text-align: left;
+		padding: 0.35rem 0.5rem;
+		border-bottom: 1px solid var(--hv-border);
+		font-variant-numeric: tabular-nums;
+	}
+	.tip {
+		position: fixed;
+		z-index: 60;
+		pointer-events: none;
+		max-width: 18rem;
+		padding: 0.5rem 0.65rem;
+		border-radius: 8px;
+		background: var(--hv-elevated);
+		border: 1px solid var(--hv-border);
+		box-shadow: var(--hv-shadow);
+		color: var(--hv-fg);
+		font-size: 0.8125rem;
+		line-height: 1.45;
+	}
+	.tip strong {
+		color: var(--hv-heading);
+	}
+	.notes {
+		margin: 1rem 0 3rem;
+		max-width: 52rem;
+	}
+</style>
+
+<script>
+	import "../scripts/ci-dashboard";
+</script>

@@ -1,0 +1,304 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+import StackFigure from "../components/site/StackFigure.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const u = (p: string) => `${base}${p}`;
+const gh = "https://github.com/NguyenTrongPhuc552003";
+const release = `${gh}/haven/releases/tag/try-20261103`;
+
+// Status as of the date below; the HAVEN overview page has the details.
+const asOf = "2026-11-06";
+const status = [
+	{ area: "Stage-2 memory isolation", state: "Working, read back", st: "good" },
+	{ area: "DMA isolation (SMMUv3)", state: "One table per granted stream; DMA blocked outside its window", st: "good" },
+	{ area: "Interrupts (GICv3)", state: "Owned per partition, hardware-linked virtual interrupts", st: "good" },
+	{ area: "CPU time budgets", state: "Enforced by the EL2 timer, read back", st: "good" },
+	{ area: "Read-back", state: "Stage-2, SMMU, GIC, HAVEN's own map and timer; seeded-fault case sets", st: "good" },
+	{ area: "Linux as a partition", state: "Boots with working interrupts; root file system with KDAL next", st: "warn" },
+	{ area: "CIX P1 board", state: "Not started (board planned, end of 2026)", st: "neutral" },
+];
+const label: Record<string, string> = { good: "Working", warn: "In progress", neutral: "Planned" };
+const icon: Record<string, string> = { good: "✓", warn: "◐", neutral: "○" };
+
+const faq = [
+	{
+		q: "What does read-back mean?",
+		a: "After HAVEN has configured the hardware, a separate tool stops the machine and reads what the hardware actually enforces: stage-2 page tables, SMMU stream tables, the interrupt controller's routing and priorities, HAVEN's own memory map. It compares that with the grant, the declared list of what each partition may use.",
+	},
+	{
+		q: "How is this different from Xen, KVM or Jailhouse?",
+		a: "HAVEN does not try to beat them on features, ecosystem or certification. It sits at the same level (EL2) as Xen dom0less and Bao. Its contribution is evidence: a check that the isolation the hardware enforces matches the declared configuration, which open static-partitioning hypervisors do not produce today.",
+	},
+	{
+		q: "Which hardware?",
+		a: "All current evidence comes from QEMU's virt machine. The thesis board is an Orange Pi 6 Plus with the CIX P1 SoC (twelve Arm cores, GICv3, SMMUv3, MPAM); the Radxa Orion O6 is a reference variant. NXP i.MX ports are legacy.",
+	},
+	{
+		q: "Can I use it in a product?",
+		a: "No. HAVEN is a research prototype for a Master's thesis, without safety certification or long-term support.",
+	},
+];
+---
+
+<SiteLayout
+	title="HAVEN: isolation you can check"
+	description="HAVEN is a small static-partitioning hypervisor for ARM64 with external read-back of the isolation the hardware enforces. With ELMOS and KDAL."
+>
+	<section class="hero">
+		<div class="wrap hero-grid">
+			<div>
+				<p class="eyebrow">ARM64 static-partitioning hypervisor</p>
+				<h1 class="hero-title">Isolation you can check.</h1>
+				<p class="lead">
+					HAVEN gives each partition its own CPUs, memory, interrupts and DMA devices, fixed at build time.
+					A separate read-back tool then reads what the hardware really enforces and compares it with the grant.
+				</p>
+				<div class="btn-row">
+					<a class="btn btn-primary" href={u("/haven/")}>Read the docs</a>
+					<a class="btn" href={u("/haven/records/try/")}>Try it in QEMU</a>
+					<a class="btn" href={`${gh}/haven`}>View the source</a>
+				</div>
+				<p class="muted small hero-note">Master's thesis artifact, Computer Engineering (UIT). Evidence so far: QEMU.</p>
+			</div>
+			<StackFigure />
+		</div>
+	</section>
+
+	<section class="section" id="projects">
+		<div class="wrap">
+			<p class="eyebrow">Three projects, one thesis</p>
+			<h2 class="section-title">Use them one by one or together</h2>
+			<div class="grid grid-3" style="margin-top:1.5rem">
+				<a class="card card-link" href={u("/haven/")}>
+					<h3>HAVEN</h3>
+					<p>The hypervisor. Runs at EL2 on ARM64; stage-2, SMMUv3 and GICv3 isolation, CPU time budgets, and read-back of the enforced state.</p>
+					<span class="more">HAVEN docs →</span>
+				</a>
+				<a class="card card-link" href={u("/elmos/")}>
+					<h3>ELMOS</h3>
+					<p>The workbench. Builds kernels, modules and root file systems on macOS, runs QEMU, and runs HAVEN with one command.</p>
+					<span class="more">ELMOS docs →</span>
+				</a>
+				<a class="card card-link" href={u("/kdal/")}>
+					<h3>KDAL</h3>
+					<p>The driver side. A Linux kernel module that gives drivers one device model and reports the hardware they need, in HAVEN's grant vocabulary.</p>
+					<span class="more">KDAL docs →</span>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="section" id="status">
+		<div class="wrap">
+			<p class="eyebrow">What works today</p>
+			<h2 class="section-title">Where it stands</h2>
+			<p class="muted">As of {asOf}, in QEMU. Details on the <a href={u("/haven/")}>HAVEN overview</a>.</p>
+			<ul class="status-list">
+				{status.map((s) => (
+					<li>
+						<span class:list={["chip", `st-${s.st}`]}><span class="dot" aria-hidden="true"></span><span aria-hidden="true">{icon[s.st]}</span>{label[s.st]}</span>
+						<strong>{s.area}</strong>
+						<span class="muted">{s.state}</span>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+
+	<section class="section" id="ci">
+		<div class="wrap">
+			<div class="row-between">
+				<div>
+					<p class="eyebrow">Continuous integration</p>
+					<h2 class="section-title">Every push, on Linux, Windows and macOS</h2>
+				</div>
+				<a class="btn" href={u("/ci/")}>Open the CI dashboard</a>
+			</div>
+			<div class="grid grid-3 ci-mini" data-ci-mini style="margin-top:1.5rem">
+				{["haven", "elmos", "kdal"].map((r) => (
+					<a class="card card-link" href={u(`/ci/#${r}`)} data-repo={r}>
+						<h3>{r}</h3>
+						<p class="ci-mini-state"><span class="chip st-neutral"><span class="dot" aria-hidden="true"></span>Loading</span></p>
+						<p class="muted small ci-mini-meta">Latest run on main</p>
+					</a>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section class="section" id="try">
+		<div class="wrap grid grid-2 try-grid">
+			<div>
+				<p class="eyebrow">Get it</p>
+				<h2 class="section-title">Run HAVEN in two minutes</h2>
+				<p>No board, no cross compiler, no build. You see two partitions on two CPUs, read-back reporting that the enforced state matches the grant, then a seeded fault that only read-back finds.</p>
+				<p class="muted small">Needs <code>qemu-system-aarch64</code> 9.2 or later, <code>python3</code> and <code>dtc</code>. macOS: <code>brew install qemu dtc</code>. Debian and Ubuntu: <code>sudo apt install qemu-system-arm python3 device-tree-compiler</code>.</p>
+				<div class="btn-row">
+					<a class="btn btn-primary" href={release}>Download the release</a>
+					<a class="btn" href={u("/start/quick-start/")}>All the ways to try it</a>
+				</div>
+			</div>
+			<pre class="code" aria-label="Commands"><code><span class="muted"># from the release page: haven-try-*.tar.gz</span>
+tar xzf haven-try-v0.6.0-162-gab6f825.tar.gz
+cd haven-try-v0.6.0-162-gab6f825
+./try.sh
+
+<span class="muted"># or, with ELMOS</span>
+elmos demo haven
+elmos demo linux</code></pre>
+		</div>
+	</section>
+
+	<section class="section" id="question">
+		<div class="wrap">
+			<p class="eyebrow">The research question</p>
+			<blockquote class="question">
+				Can independent read-back of enforced hardware state (stage-2, SMMU, GIC) find enforcement drift that policy tests and configuration checks cannot, without growing HAVEN's trusted code?
+			</blockquote>
+			<p class="muted">How this narrows against prior work: <a href={u("/haven/records/related-work/")}>related work</a>.</p>
+		</div>
+	</section>
+
+	<section class="section" id="faq">
+		<div class="wrap">
+			<p class="eyebrow">FAQ</p>
+			<h2 class="section-title">Questions</h2>
+			<div class="faq">
+				{faq.map((f) => (
+					<details class="card">
+						<summary>{f.q}</summary>
+						<p>{f.a}</p>
+					</details>
+				))}
+			</div>
+		</div>
+	</section>
+</SiteLayout>
+
+<style>
+	.hero {
+		padding-block: 5rem 4rem;
+		background:
+			radial-gradient(60rem 30rem at 85% -10%, var(--hv-accent-soft), transparent 70%),
+			var(--hv-canvas);
+	}
+	.hero-grid {
+		display: grid;
+		grid-template-columns: 1.05fr 1fr;
+		gap: 3rem;
+		align-items: center;
+	}
+	@media (max-width: 56rem) {
+		.hero-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+	.hero-title {
+		font-size: clamp(2.4rem, 6vw, 3.8rem);
+		letter-spacing: -0.03em;
+		margin-bottom: 1rem;
+	}
+	.hero-note {
+		margin-top: 1.25rem;
+	}
+	.more {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--hv-link);
+	}
+	.status-list {
+		list-style: none;
+		padding: 0;
+		margin: 1.5rem 0 0;
+		border: 1px solid var(--hv-border);
+		border-radius: var(--hv-radius);
+		background: var(--hv-surface);
+		overflow: hidden;
+	}
+	.status-list li {
+		display: grid;
+		grid-template-columns: 8.5rem 14rem 1fr;
+		gap: 1rem;
+		align-items: center;
+		padding: 0.85rem 1.25rem;
+	}
+	.status-list li + li {
+		border-top: 1px solid var(--hv-border);
+	}
+	.status-list strong {
+		color: var(--hv-heading);
+		font-weight: 600;
+	}
+	@media (max-width: 48rem) {
+		.status-list li {
+			grid-template-columns: 1fr;
+			gap: 0.25rem;
+		}
+	}
+	.row-between {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		align-items: end;
+		justify-content: space-between;
+	}
+	.ci-mini h3 {
+		font-family: var(--hv-mono);
+		font-size: 1rem;
+	}
+	.ci-mini p {
+		margin: 0.4rem 0 0;
+	}
+	.try-grid {
+		align-items: center;
+		gap: 2.5rem;
+	}
+	.question {
+		margin: 0.5rem 0 1rem;
+		padding: 1.5rem 1.75rem;
+		border-left: 3px solid var(--hv-link);
+		background: var(--hv-surface);
+		border-radius: 0 var(--hv-radius) var(--hv-radius) 0;
+		font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+		line-height: 1.5;
+		color: var(--hv-heading);
+	}
+	.faq {
+		display: grid;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
+	}
+	.faq details {
+		padding: 1rem 1.25rem;
+	}
+	.faq summary {
+		cursor: pointer;
+		font-weight: 600;
+		color: var(--hv-heading);
+	}
+	.faq details p {
+		margin: 0.75rem 0 0;
+	}
+</style>
+
+<script>
+	import { latestRun, describe } from "../scripts/ci-api";
+
+	for (const card of document.querySelectorAll<HTMLElement>("[data-ci-mini] [data-repo]")) {
+		const repo = card.dataset.repo!;
+		const state = card.querySelector(".ci-mini-state")!;
+		const meta = card.querySelector(".ci-mini-meta")!;
+		latestRun(repo)
+			.then((run) => {
+				if (!run) throw new Error("no run");
+				const d = describe(run.status, run.conclusion);
+				state.innerHTML = `<span class="chip st-${d.st}"><span class="dot" aria-hidden="true"></span><span aria-hidden="true">${d.icon}</span>${d.label}</span>`;
+				meta.textContent = `${run.head_sha.slice(0, 7)} · ${new Date(run.created_at).toLocaleString()}`;
+			})
+			.catch(() => {
+				state.innerHTML = `<span class="chip st-neutral"><span class="dot" aria-hidden="true"></span>Unavailable</span>`;
+				meta.textContent = "GitHub API not reachable or rate-limited; open the dashboard.";
+			});
+	}
+</script>

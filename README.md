@@ -7,7 +7,8 @@ Starlight site, one sidebar per project (`starlight-sidebar-topics`).
 
 | Pages | Source |
 | - | - |
-| `src/content/docs/index.mdx`, `start/` | written here |
+| `src/pages/index.astro` (landing), `src/pages/ci.astro` (CI dashboard) | written here, with `src/layouts/SiteLayout.astro` |
+| `src/content/docs/start/` | written here |
 | `src/content/docs/haven/` (overview, getting started, roadmap, porting, background) | written here; replaces the former `haven-wiki` repository and the former `haven/website` site |
 | `src/content/docs/haven/records/` | copied from the `haven` repository at build time (README, research records, read-back, related work, try, changelog) |
 | `src/content/docs/elmos/`, `kdal/` | copied from the `elmos` and `kdal` repositories at build time; the ELMOS command reference is generated from the code (`elmos gendocs`) |
@@ -35,11 +36,26 @@ from shallow clones that `scripts/fetch-sources.mjs` makes in `.sources/`
 
 ## Hosting
 
-- **Production: Vercel.** Vercel builds the repository with
-  `npm run build` and serves `dist/` at the root of the project's domain
-  (`VERCEL` and `VERCEL_PROJECT_PRODUCTION_URL` set the address).
+- **Production: Vercel**, https://docs-haven.vercel.app/. Vercel builds
+  the repository with `npm run build` on every push to `main` and serves
+  `dist/` at the root of the domain (`VERCEL` and
+  `VERCEL_PROJECT_PRODUCTION_URL` set the address). `.github/workflows/rebuild.yml`
+  rebuilds it nightly through a deploy hook (secret `VERCEL_DEPLOY_HOOK`).
 - **Fallback: GitHub Pages** at `https://nguyentrongphuc552003.github.io/haven-docs/`,
   built and link-checked by `.github/workflows/pages.yml` on every push and
   nightly.
 
 `DOCS_SITE` and `DOCS_BASE` override the address for other hosts.
+
+## Look and feel
+
+- Design tokens (colours, fonts, chart palette) are in `src/styles/tokens.css`;
+  `src/styles/starlight.css` maps them onto Starlight, so the landing page,
+  the CI dashboard and the documentation share one look in light and dark.
+- `src/components/ThemeToggle.astro` is the light/dark button next to the
+  GitHub icon (it replaces Starlight's theme select); the choice is stored
+  under Starlight's key, so it holds on every page.
+- The CI dashboard reads the `ci` workflow runs of haven, elmos and kdal
+  from GitHub's public API in the visitor's browser (`src/scripts/ci-api.ts`,
+  `src/scripts/ci-dashboard.ts`); chart colours follow the validated
+  reference palette, and status always has an icon and a label.

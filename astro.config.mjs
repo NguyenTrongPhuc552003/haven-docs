@@ -20,8 +20,12 @@ export default defineConfig({
   image: { service: passthroughImageService() },
   integrations: [
     starlight({
-      title: "HAVEN · ELMOS · KDAL",
-      logo: { light: "./src/assets/logo-light.svg", dark: "./src/assets/logo-dark.svg" },
+      title: "HAVEN",
+      logo: { light: "./src/assets/logo-light.svg", dark: "./src/assets/logo-dark.svg", replacesTitle: true },
+      favicon: "/favicon.svg",
+      customCss: ["./src/styles/starlight.css"],
+      // one light/dark button next to the GitHub icon instead of the select
+      components: { ThemeSelect: "./src/components/ThemeToggle.astro" },
       editLink: { baseUrl: "https://github.com/NguyenTrongPhuc552003/haven-docs/edit/main/" },
       description:
         "An ARM64 static-partitioning hypervisor with enforcement read-back, a macOS embedded-Linux workbench, and a device abstraction layer: documentation.",
@@ -32,9 +36,13 @@ export default defineConfig({
         starlightSidebarTopics([
           {
             label: "Start here",
-            link: "/",
+            link: "/start/quick-start/",
             icon: "rocket",
-            items: [{ autogenerate: { directory: "start" } }],
+            items: [
+              { autogenerate: { directory: "start" } },
+              { label: "CI status", link: "/ci/" },
+              { label: "Home", link: "/" },
+            ],
           },
           {
             label: "HAVEN",

@@ -1,0 +1,81 @@
+---
+// One button that switches between light and dark. Replaces Starlight's
+// ThemeSelect (so it sits next to the GitHub icon in the docs header) and is
+// used in the landing and CI pages' header. Same storage key as Starlight
+// ("starlight-theme"), so the choice carries across all pages; with no
+// stored choice the system preference applies.
+---
+
+<button type="button" class="hv-theme-toggle" aria-label="Switch to light mode" title="Switch to light mode">
+	<svg class="hv-icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+	<svg class="hv-icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>
+</button>
+
+<style>
+	.hv-theme-toggle {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		padding: 0;
+		border: 0;
+		border-radius: 8px;
+		background: transparent;
+		color: var(--sl-color-gray-3, var(--hv-muted));
+		cursor: pointer;
+	}
+	.hv-theme-toggle:hover {
+		color: var(--sl-color-white, var(--hv-heading));
+	}
+	.hv-theme-toggle:focus-visible {
+		outline: 2px solid var(--sl-color-accent, var(--hv-link));
+		outline-offset: 2px;
+	}
+	/* dark shows the sun (switch to light); light shows the moon */
+	.hv-icon-moon {
+		display: none;
+	}
+	:global([data-theme="light"]) .hv-icon-sun {
+		display: none;
+	}
+	:global([data-theme="light"]) .hv-icon-moon {
+		display: block;
+	}
+</style>
+
+<script>
+	const KEY = "starlight-theme";
+	const current = () => (document.documentElement.dataset.theme === "light" ? "light" : "dark");
+	function label() {
+		const next = current() === "dark" ? "light" : "dark";
+		for (const b of document.querySelectorAll<HTMLButtonElement>(".hv-theme-toggle")) {
+			b.setAttribute("aria-label", `Switch to ${next} mode`);
+			b.title = `Switch to ${next} mode`;
+		}
+	}
+	function set(theme: "light" | "dark") {
+		document.documentElement.dataset.theme = theme;
+		try {
+			localStorage.setItem(KEY, theme);
+		} catch {
+			/* storage unavailable: the choice lasts for this page only */
+		}
+		label();
+		document.dispatchEvent(new CustomEvent("hv-theme", { detail: theme }));
+	}
+	for (const b of document.querySelectorAll<HTMLButtonElement>(".hv-theme-toggle")) {
+		b.addEventListener("click", () => set(current() === "dark" ? "light" : "dark"));
+	}
+	matchMedia("(prefers-color-scheme: light)").addEventListener("change", (e) => {
+		let stored = null;
+		try {
+			stored = localStorage.getItem(KEY);
+		} catch {}
+		if (!stored) {
+			document.documentElement.dataset.theme = e.matches ? "light" : "dark";
+			label();
+		}
+	});
+	label();
+</script>

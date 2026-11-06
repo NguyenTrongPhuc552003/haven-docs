@@ -1,0 +1,143 @@
+---
+// Where HAVEN sits, and what read-back looks at. Illustration, not a
+// measurement. Colours come from the page tokens, so it follows the theme.
+---
+
+<figure class="stack">
+	<svg viewBox="0 0 560 400" role="img" aria-labelledby="stack-t stack-d">
+		<title id="stack-t">HAVEN in the ARM64 stack</title>
+		<desc id="stack-d">Two partitions at EL1 (Linux with KDAL, and an RTOS) run on HAVEN at EL2, which programs stage-2 translation, the SMMU, the GIC and CPU time budgets. Firmware runs at EL3. A separate read-back tool reads the enforced hardware state and compares it with the grant.</desc>
+		<defs>
+			<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+				<path d="M0 0L10 5L0 10z" class="arrow-head"></path>
+			</marker>
+		</defs>
+
+		<!-- EL labels -->
+		<text x="0" y="56" class="el">EL1</text>
+		<text x="0" y="160" class="el">EL2</text>
+		<text x="0" y="250" class="el">EL3</text>
+		<text x="0" y="330" class="el">HW</text>
+
+		<!-- partitions -->
+		<rect x="44" y="20" width="176" height="72" rx="12" class="box part-a"></rect>
+		<text x="60" y="48" class="t1">Partition A</text>
+		<text x="60" y="70" class="t2">Linux v6.18 + KDAL</text>
+		<rect x="232" y="20" width="176" height="72" rx="12" class="box part-b"></rect>
+		<text x="248" y="48" class="t1">Partition B</text>
+		<text x="248" y="70" class="t2">RTOS / bare metal</text>
+
+		<!-- HAVEN -->
+		<rect x="44" y="112" width="364" height="96" rx="14" class="box haven"></rect>
+		<text x="60" y="140" class="t1 strong">HAVEN</text>
+		<text x="128" y="140" class="t2">static partitions, fixed at build time</text>
+		<g class="chips">
+			<rect x="60" y="156" width="74" height="32" rx="8"></rect>
+			<text x="97" y="177" text-anchor="middle">Stage-2</text>
+			<rect x="142" y="156" width="74" height="32" rx="8"></rect>
+			<text x="179" y="177" text-anchor="middle">SMMUv3</text>
+			<rect x="224" y="156" width="74" height="32" rx="8"></rect>
+			<text x="261" y="177" text-anchor="middle">GICv3</text>
+			<rect x="306" y="156" width="86" height="32" rx="8"></rect>
+			<text x="349" y="177" text-anchor="middle">CPU budgets</text>
+		</g>
+
+		<!-- firmware -->
+		<rect x="44" y="228" width="364" height="40" rx="10" class="box fw"></rect>
+		<text x="60" y="253" class="t2">Firmware: TF-A (EL3), then UEFI or U-Boot</text>
+
+		<!-- hardware -->
+		<rect x="44" y="288" width="364" height="72" rx="12" class="box hw"></rect>
+		<text x="60" y="314" class="t1">Hardware state</text>
+		<text x="60" y="338" class="t2">page tables · stream tables · routing · timers</text>
+
+		<!-- read-back -->
+		<rect x="436" y="112" width="120" height="156" rx="14" class="box rb"></rect>
+		<text x="496" y="142" text-anchor="middle" class="t1 strong">Read-back</text>
+		<text x="496" y="168" text-anchor="middle" class="t2">outside HAVEN</text>
+		<rect x="452" y="186" width="88" height="28" rx="7" class="grant"></rect>
+		<text x="496" y="205" text-anchor="middle" class="t3">grant.json</text>
+		<text x="496" y="244" text-anchor="middle" class="t2">match or</text>
+		<text x="496" y="260" text-anchor="middle" class="t2">finding</text>
+		<path d="M408 324 H496 V272" class="flow" marker-end="url(#arr)"></path>
+		<text x="420" y="316" class="t3">reads</text>
+	</svg>
+</figure>
+
+<style>
+	.stack {
+		margin: 0;
+		padding: 1.25rem;
+		background: var(--hv-surface);
+		border: 1px solid var(--hv-border);
+		border-radius: 18px;
+		box-shadow: var(--hv-shadow);
+	}
+	svg {
+		width: 100%;
+		height: auto;
+		display: block;
+		font-family: var(--hv-font);
+	}
+	.el {
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		fill: var(--hv-muted);
+	}
+	.box {
+		fill: var(--hv-elevated);
+		stroke: var(--hv-border);
+		stroke-width: 1.5;
+	}
+	.haven {
+		fill: var(--hv-accent-soft);
+		stroke: var(--hv-link);
+		stroke-width: 2;
+	}
+	.rb {
+		stroke: var(--hv-link);
+		stroke-dasharray: 5 4;
+		stroke-width: 1.5;
+	}
+	.grant {
+		fill: var(--hv-surface);
+		stroke: var(--hv-border);
+	}
+	.t1 {
+		font-size: 15px;
+		font-weight: 600;
+		fill: var(--hv-heading);
+	}
+	.strong {
+		font-weight: 800;
+		letter-spacing: 0.04em;
+	}
+	.t2 {
+		font-size: 12.5px;
+		fill: var(--hv-fg);
+	}
+	.t3 {
+		font-size: 11.5px;
+		font-family: var(--hv-mono);
+		fill: var(--hv-fg);
+	}
+	.chips rect {
+		fill: var(--hv-surface);
+		stroke: var(--hv-border);
+	}
+	.chips text {
+		font-size: 12px;
+		font-weight: 600;
+		fill: var(--hv-heading);
+	}
+	.flow {
+		fill: none;
+		stroke: var(--hv-link);
+		stroke-width: 2;
+		stroke-dasharray: 5 4;
+	}
+	.arrow-head {
+		fill: var(--hv-link);
+	}
+</style>
