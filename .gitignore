@@ -1,6 +1,8 @@
 node_modules/
 dist/
 .astro/
-src/content/docs/haven/
+src/content/docs/haven/records/
 src/content/docs/elmos/
 src/content/docs/kdal/
+.sources/
+.vercel/

@@ -6,30 +6,30 @@
 // relative links point at the file on GitHub. The ELMOS command reference
 // is generated from the code (elmos gendocs).
 //
-// Sources: sibling checkouts (../haven, ../haven-wiki, ../elmos, ../kdal) or
-// the directory in SRC_ROOT.
+// Sources: sibling checkouts (../haven, ../elmos, ../kdal), the directory in
+// SRC_ROOT, or shallow clones made by scripts/fetch-sources.mjs.
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
-const SRC = path.resolve(process.env.SRC_ROOT ?? path.join(ROOT, ".."));
+const SIBLINGS = path.join(ROOT, "..");
+const SRC = path.resolve(process.env.SRC_ROOT ?? (fs.existsSync(path.join(SIBLINGS, "haven")) ? SIBLINGS : path.join(ROOT, ".sources")));
 const OUT = path.join(ROOT, "src", "content", "docs");
-const BASE = (process.env.DOCS_BASE ?? "/docs").replace(/\/$/, "");
+const BASE = (process.env.DOCS_BASE ?? (process.env.VERCEL ? "" : "/haven-docs")).replace(/\/$/, "");
 const OWNER = "https://github.com/NguyenTrongPhuc552003";
 
 // [repo, source path (file or dir), site dir or file]
+// HAVEN's hand-written pages (overview, guides, background) live in this
+// repository under src/content/docs/haven/; only the pages that belong to
+// the code are copied, into haven/records/.
 const MAP = [
-  ["haven", "README.md", "haven/index.md"],
-  ["haven", "scripts/release/try/README.md", "haven/try.md"],
-  ["haven", "tools/readback/README.md", "haven/read-back.md"],
-  ["haven", "docs/research/related-work.md", "haven/related-work.md"],
-  ["haven", "docs/README.md", "haven/research-records.md"],
-  ["haven-wiki", "Architecture.md", "haven/wiki/architecture.md"],
-  ["haven-wiki", "Isolation-Model.md", "haven/wiki/isolation-model.md"],
-  ["haven-wiki", "Threat-Model.md", "haven/wiki/threat-model.md"],
-  ["haven-wiki", "Porting.md", "haven/wiki/porting.md"],
-  ["haven-wiki", "Testing-Guide.md", "haven/wiki/testing-guide.md"],
+  ["haven", "README.md", "haven/records/readme.md"],
+  ["haven", "scripts/release/try/README.md", "haven/records/try.md"],
+  ["haven", "tools/readback/README.md", "haven/records/read-back.md"],
+  ["haven", "docs/research/related-work.md", "haven/records/related-work.md"],
+  ["haven", "docs/README.md", "haven/records/research-records.md"],
+  ["haven", "CHANGELOG.md", "haven/records/changelog.md"],
   ["elmos", "README.md", "elmos/index.md"],
   ["elmos", "docs/user", "elmos/guide"],
   ["elmos", "docs/developer", "elmos/developer"],
@@ -100,11 +100,15 @@ function rewriteLinks(text, file, repo) {
   });
 }
 
-for (const dir of ["haven", "elmos", "kdal"]) fs.rmSync(path.join(OUT, dir), { recursive: true, force: true });
+for (const dir of ["haven/records", "elmos", "kdal"]) fs.rmSync(path.join(OUT, dir), { recursive: true, force: true });
 for (const p of plan) {
   let text = fs.readFileSync(p.file, "utf8");
   text = frontMatter(text, path.basename(p.dest).replace(/\.mdx?$/, ""));
   if (!p.file.endsWith(".mdx")) text = rewriteLinks(text, p.file, p.repo);
+  // KDAL's pages come from its own Starlight site, where links are absolute
+  // from that site's root: move them under /kdal/.
+  if (p.repo === "kdal")
+    text = text.replace(/(\]\(|href="|link:\s*)\/(?!\/)/g, `$1${BASE}/kdal/`);
   const out = path.join(OUT, p.dest);
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, text);

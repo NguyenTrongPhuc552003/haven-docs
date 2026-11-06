@@ -1,12 +1,17 @@
-// One documentation site for HAVEN, ELMOS and KDAL (audit E5).
-// Content is copied from the three repositories at build time by
-// scripts/sync.mjs, so each repository stays the single source of its pages.
+// HAVEN's official site, with the ELMOS and KDAL documentation.
+// HAVEN's own pages are written here (src/content/docs/haven/); pages that
+// belong to the code (README, records, changelog) and the ELMOS and KDAL
+// documentation are copied from the repositories at build time by
+// scripts/sync.mjs.
 import { defineConfig, passthroughImageService } from "astro/config";
 import starlight from "@astrojs/starlight";
 import starlightSidebarTopics from "starlight-sidebar-topics";
 
-const SITE = process.env.DOCS_SITE ?? "https://nguyentrongphuc552003.github.io";
-const BASE = process.env.DOCS_BASE ?? "/docs";
+// Vercel (production) serves the site at the root of its domain; the
+// GitHub Pages fallback serves it under /haven-docs.
+const VERCEL_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+const SITE = process.env.DOCS_SITE ?? (VERCEL_URL ? `https://${VERCEL_URL}` : "https://nguyentrongphuc552003.github.io");
+const BASE = process.env.DOCS_BASE ?? (process.env.VERCEL ? "/" : "/haven-docs");
 
 export default defineConfig({
   site: SITE,
@@ -16,6 +21,8 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "HAVEN · ELMOS · KDAL",
+      logo: { light: "./src/assets/logo-light.svg", dark: "./src/assets/logo-dark.svg" },
+      editLink: { baseUrl: "https://github.com/NguyenTrongPhuc552003/haven-docs/edit/main/" },
       description:
         "An ARM64 static-partitioning hypervisor with enforcement read-back, a macOS embedded-Linux workbench, and a device abstraction layer: documentation.",
       social: [
@@ -33,7 +40,15 @@ export default defineConfig({
             label: "HAVEN",
             link: "/haven/",
             icon: "seti:lock",
-            items: [{ autogenerate: { directory: "haven" } }],
+            items: [
+              "haven",
+              "haven/getting-started",
+              "haven/records/try",
+              "haven/roadmap",
+              "haven/porting",
+              { label: "From the repository", items: [{ autogenerate: { directory: "haven/records" } }] },
+              { label: "Background (May to June 2026)", collapsed: true, items: [{ autogenerate: { directory: "haven/background" } }] },
+            ],
           },
           {
             label: "ELMOS",

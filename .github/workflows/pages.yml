@@ -1,5 +1,6 @@
-# Build the site from the three project repositories and deploy it to
-# GitHub Pages (Settings > Pages > Source: GitHub Actions).
+# Build the site with the project repositories checked out next to it, check
+# its links, and deploy it to GitHub Pages (Settings > Pages > Source: GitHub
+# Actions). Vercel builds the production site on its own (scripts/fetch-sources.mjs).
 name: pages
 
 on:
@@ -24,15 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: docs
+          path: haven-docs
       - uses: actions/checkout@v4
         with:
           repository: NguyenTrongPhuc552003/haven
           path: haven
-      - uses: actions/checkout@v4
-        with:
-          repository: NguyenTrongPhuc552003/haven-wiki
-          path: haven-wiki
       - uses: actions/checkout@v4
         with:
           repository: NguyenTrongPhuc552003/elmos
@@ -48,14 +45,14 @@ jobs:
         with:
           node-version: 22
       - name: Build
-        working-directory: docs
+        working-directory: haven-docs
         run: |
           npm ci
           npm run build
           node scripts/check-links.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/dist
+          path: haven-docs/dist
 
   deploy:
     needs: build

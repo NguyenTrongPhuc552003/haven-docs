@@ -5,7 +5,7 @@ import path from "node:path";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const DIST = path.join(ROOT, "dist");
-const BASE = (process.env.DOCS_BASE ?? "/docs").replace(/\/$/, "");
+const BASE = (process.env.DOCS_BASE ?? (process.env.VERCEL ? "" : "/haven-docs")).replace(/\/$/, "");
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
@@ -20,8 +20,8 @@ for (const file of pages) {
     let href = m[1];
     if (/^(https?:|mailto:)/.test(href)) continue;
     if (!href.startsWith("/")) href = path.posix.join(path.posix.dirname("/" + path.relative(DIST, file)), href);
-    else if (href.startsWith(BASE)) href = href.slice(BASE.length) || "/";
-    else continue;
+    else if (href.startsWith(BASE + "/") || href === BASE) href = href.slice(BASE.length) || "/";
+    // an absolute link outside the base path is broken on the published site
     const target = path.join(DIST, href);
     const ok = fs.existsSync(target) && (fs.statSync(target).isFile() || fs.existsSync(path.join(target, "index.html")));
     if (!ok) {
