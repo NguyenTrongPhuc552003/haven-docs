@@ -44,7 +44,7 @@ build of this site.
 | Two partitions on two CPUs | Partition B on CPU 2 with its own virtual timer (`qemu-psci` profile) |
 | CPU time budgets | Enforced by the EL2 timer; read back |
 | Read-back | Stage-2, SMMU, GIC (with priorities), HAVEN's EL2 map and timer; seeded-fault case sets; grants also in Arm's FF-A manifest vocabulary ([read-back tool](records/read-back/)) |
-| Linux as a partition | Linux v6.18 boots to the root mount with working interrupts: PSCI over HVC, MMIO decode, emulated GICv3 distributor and redistributor, virtual timer and self-IPIs delivered; a root file system with KDAL is next |
+| Linux as a partition | Linux v6.18 with working interrupts (PSCI, MMIO decode, emulated GICv3, virtual timer); KDAL loads in it, its demand is checked against the grant, and read-back of the same grant matches |
 | CI | GitHub Actions: host tests on Linux, macOS and Windows; ARM64 build; QEMU boot |
 | Board | Not started (no board yet) |
 

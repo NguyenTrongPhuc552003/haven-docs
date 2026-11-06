@@ -15,7 +15,7 @@ const status = [
 	{ area: "Interrupts (GICv3)", state: "Owned per partition, hardware-linked virtual interrupts", st: "good" },
 	{ area: "CPU time budgets", state: "Enforced by the EL2 timer, read back", st: "good" },
 	{ area: "Read-back", state: "Stage-2, SMMU, GIC, HAVEN's own map and timer; seeded-fault case sets", st: "good" },
-	{ area: "Linux as a partition", state: "Boots with working interrupts; root file system with KDAL next", st: "warn" },
+	{ area: "Linux as a partition", state: "Runs with working interrupts; KDAL's demand checked against the grant, read-back matches", st: "good" },
 	{ area: "CIX P1 board", state: "Not started (board planned, end of 2026)", st: "neutral" },
 ];
 const label: Record<string, string> = { good: "Working", warn: "In progress", neutral: "Planned" };
