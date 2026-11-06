@@ -35,7 +35,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://docs-haven.
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonical} />
+		<link rel="icon" href={u("/favicon.ico")} sizes="32x32" />
 		<link rel="icon" href={u("/favicon.svg")} type="image/svg+xml" />
+		<link rel="apple-touch-icon" href={u("/apple-touch-icon.png")} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />

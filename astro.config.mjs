@@ -20,9 +20,16 @@ export default defineConfig({
   image: { service: passthroughImageService() },
   integrations: [
     starlight({
-      title: "HAVEN",
+      title: "Haven",
       logo: { light: "./src/assets/logo-light.svg", dark: "./src/assets/logo-dark.svg", replacesTitle: true },
       favicon: "/favicon.svg",
+      // ICO and PNG fallbacks: some browsers (Safari) do not use SVG tab icons
+      head: [
+        { tag: "link", attrs: { rel: "icon", href: `${BASE.replace(/\/$/, "")}/favicon.ico`, sizes: "32x32" } },
+        { tag: "link", attrs: { rel: "apple-touch-icon", href: `${BASE.replace(/\/$/, "")}/apple-touch-icon.png` } },
+      ],
+      // short, sentence-case browser-tab titles (src/tab-title.ts)
+      routeMiddleware: "./src/route-data.ts",
       customCss: ["./src/styles/starlight.css"],
       // one light/dark button next to the GitHub icon instead of the select
       components: { ThemeSelect: "./src/components/ThemeToggle.astro" },
