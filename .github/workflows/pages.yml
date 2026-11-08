@@ -1,11 +1,13 @@
 # Build the site with the project repositories checked out next to it, check
 # its links, and deploy it to GitHub Pages (Settings > Pages > Source: GitHub
 # Actions). Vercel builds the production site on its own (scripts/fetch-sources.mjs).
+# Pull requests run the build and link check only (a required check on main).
 name: pages
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: "17 3 * * *" # nightly, to pick up documentation changes in the projects
@@ -16,7 +18,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -51,11 +53,13 @@ jobs:
           npm run build
           node scripts/check-links.mjs
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: haven-docs/dist
 
   deploy:
     needs: build
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
