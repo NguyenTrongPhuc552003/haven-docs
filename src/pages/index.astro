@@ -5,7 +5,7 @@ import StackFigure from "../components/site/StackFigure.astro";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const u = (p: string) => `${base}${p}`;
 const gh = "https://github.com/NguyenTrongPhuc552003";
-const release = `${gh}/haven/releases/tag/try-20261103`;
+const release = u("/start/quick-start/");
 
 // Status as of the date below; the HAVEN overview page has the details.
 const asOf = "2026-11-06";
@@ -131,18 +131,18 @@ const faq = [
 		<div class="wrap grid grid-2 try-grid">
 			<div>
 				<p class="eyebrow">Get it</p>
-				<h2 class="section-title">Run HAVEN in two minutes</h2>
-				<p>No board, no cross compiler, no build. You see two partitions on two CPUs, read-back reporting that the enforced state matches the grant, then a seeded fault that only read-back finds.</p>
+				<h2 class="section-title">Run HAVEN without a board</h2>
+				<p>No board needed. Until the next release you build the bundle once (it needs the ARM64 cross toolchain); then you see two partitions on two CPUs, read-back reporting that the enforced state matches the grant, then a seeded fault that only read-back finds.</p>
 				<p class="muted small">Needs <code>qemu-system-aarch64</code> 9.2 or later, <code>python3</code> and <code>dtc</code>. macOS: <code>brew install qemu dtc</code>. Debian and Ubuntu: <code>sudo apt install qemu-system-arm python3 device-tree-compiler</code>.</p>
 				<div class="btn-row">
-					<a class="btn btn-primary" href={release}>Download the release</a>
+					<a class="btn btn-primary" href={release}>How to run it</a>
 					<a class="btn" href={u("/start/quick-start/")}>All the ways to try it</a>
 				</div>
 			</div>
-			<pre class="code" aria-label="Commands"><code><span class="muted"># from the release page: haven-try-*.tar.gz</span>
-tar xzf haven-try-v0.6.0-162-gab6f825.tar.gz
-cd haven-try-v0.6.0-162-gab6f825
-./try.sh
+			<pre class="code" aria-label="Commands"><code><span class="muted"># from a HAVEN checkout (prebuilt archive: next release)</span>
+scripts/release/make-try-bundle.sh dist
+tar xzf dist/haven-try-*.tar.gz
+cd haven-try-*/ && ./try.sh
 
 <span class="muted"># or, with ELMOS</span>
 elmos demo haven
