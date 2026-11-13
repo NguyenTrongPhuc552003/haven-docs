@@ -8,21 +8,25 @@ sidebar:
 Everything here runs in QEMU on a Mac or a Linux machine. Each level
 needs a little more setup than the one before; stop at any level.
 
-## Level 1: HAVEN, prebuilt (about 15 s)
+## Level 1: HAVEN, the try bundle (about 15 s to run)
 
 Needs `qemu-system-aarch64` (9.2 or later), `python3` and `dtc`
 (macOS: `brew install qemu dtc`; Debian and Ubuntu:
 `sudo apt install qemu-system-arm python3 device-tree-compiler`).
 
-Download `haven-try-*.tar.gz` from the
-[HAVEN try release](https://github.com/NguyenTrongPhuc552003/haven/releases/tag/try-20261103),
-then:
+The prebuilt archive was withdrawn on 2026-11-13 and returns with the next
+deliberate release. Until then, build the same archive from a HAVEN checkout
+(this needs the ARM64 cross toolchain from Level 2), then run it:
 
 ```sh
-tar xzf haven-try-v0.6.0-162-gab6f825.tar.gz
-cd haven-try-v0.6.0-162-gab6f825
+scripts/release/make-try-bundle.sh dist
+tar xzf dist/haven-try-*.tar.gz
+cd haven-try-*/
 ./try.sh
 ```
+
+`elmos demo haven` still fetches the earlier archive from the Codeberg
+mirror.
 
 You see two partitions on two CPUs, read-back reporting that the enforced
 state matches the grant, and then a seeded fault that both partitions'
