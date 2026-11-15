@@ -25,8 +25,8 @@ cd haven-try-*/
 ./try.sh
 ```
 
-`elmos demo haven` still fetches the earlier archive from the Codeberg
-mirror.
+`elmos demo haven` has no archive to fetch until then: the earlier one is
+gone from the Codeberg mirror too.
 
 You see two partitions on two CPUs, read-back reporting that the enforced
 state matches the grant, and then a seeded fault that both partitions'
