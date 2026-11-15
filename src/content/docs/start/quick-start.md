@@ -14,19 +14,21 @@ Needs `qemu-system-aarch64` (9.2 or later), `python3` and `dtc`
 (macOS: `brew install qemu dtc`; Debian and Ubuntu:
 `sudo apt install qemu-system-arm python3 device-tree-compiler`).
 
-The prebuilt archive was withdrawn on 2026-11-13 and returns with the next
-deliberate release. Until then, build the same archive from a HAVEN checkout
-(this needs the ARM64 cross toolchain from Level 2), then run it:
+Download the release `try-20261115.1` (built and tested by CI), check it and
+run it:
 
 ```sh
-scripts/release/make-try-bundle.sh dist
-tar xzf dist/haven-try-*.tar.gz
-cd haven-try-*/
+curl -LO https://github.com/NguyenTrongPhuc552003/haven/releases/download/try-20261115.1/haven-try-v0.6.0-425-g13dd128.tar.gz
+curl -LO https://github.com/NguyenTrongPhuc552003/haven/releases/download/try-20261115.1/haven-try-v0.6.0-425-g13dd128.tar.gz.sha256
+shasum -a 256 -c haven-try-v0.6.0-425-g13dd128.tar.gz.sha256
+tar xzf haven-try-v0.6.0-425-g13dd128.tar.gz
+cd haven-try-v0.6.0-425-g13dd128/
 ./try.sh
 ```
 
-`elmos demo haven` has no archive to fetch until then: the earlier one is
-gone from the Codeberg mirror too.
+To build the same archive from a HAVEN checkout instead (this needs the
+ARM64 cross toolchain from Level 2): `scripts/release/make-try-bundle.sh dist`.
+`elmos demo haven` fetches the release for you.
 
 You see two partitions on two CPUs, read-back reporting that the enforced
 state matches the grant, and then a seeded fault that both partitions'

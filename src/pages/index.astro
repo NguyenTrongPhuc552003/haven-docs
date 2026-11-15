@@ -139,10 +139,10 @@ const faq = [
 					<a class="btn" href={u("/start/quick-start/")}>All the ways to try it</a>
 				</div>
 			</div>
-			<pre class="code" aria-label="Commands"><code><span class="muted"># from a HAVEN checkout (prebuilt archive: next release)</span>
-scripts/release/make-try-bundle.sh dist
-tar xzf dist/haven-try-*.tar.gz
-cd haven-try-*/ && ./try.sh
+			<pre class="code" aria-label="Commands"><code><span class="muted"># the prebuilt release try-20261115.1</span>
+curl -LO https://github.com/NguyenTrongPhuc552003/haven/releases/download/try-20261115.1/haven-try-v0.6.0-425-g13dd128.tar.gz
+tar xzf haven-try-v0.6.0-425-g13dd128.tar.gz
+cd haven-try-v0.6.0-425-g13dd128/ && ./try.sh
 
 <span class="muted"># or, with ELMOS</span>
 elmos demo haven
