@@ -3,6 +3,6 @@ dist/
 .astro/
 src/content/docs/haven/records/
 src/content/docs/elmos/
-src/content/docs/kdal/
+src/content/docs/kdal/records/
 .sources/
 .vercel/

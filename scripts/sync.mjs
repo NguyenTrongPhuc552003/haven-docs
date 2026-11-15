@@ -20,9 +20,9 @@ const BASE = (process.env.DOCS_BASE ?? (process.env.VERCEL ? "" : "/haven-docs")
 const OWNER = "https://github.com/NguyenTrongPhuc552003";
 
 // [repo, source path (file or dir), site dir or file]
-// HAVEN's hand-written pages (overview, guides, background) live in this
-// repository under src/content/docs/haven/; only the pages that belong to
-// the code are copied, into haven/records/.
+// HAVEN's and KDAL's hand-written pages live in this repository under
+// src/content/docs/haven/ and src/content/docs/kdal/; only the pages that
+// belong to the code are copied, into haven/records/ and kdal/records/.
 const MAP = [
   ["haven", "README.md", "haven/records/readme.md"],
   ["haven", "scripts/release/try/README.md", "haven/records/try.md"],
@@ -33,7 +33,8 @@ const MAP = [
   ["elmos", "README.md", "elmos/index.md"],
   ["elmos", "docs/user", "elmos/guide"],
   ["elmos", "docs/developer", "elmos/developer"],
-  ["kdal", "website/src/content/docs", "kdal"],
+  ["kdal", "README.md", "kdal/records/readme.md"],
+  ["kdal", "CHANGELOG.md", "kdal/records/changelog.md"],
 ];
 
 const copied = new Map(); // absolute source file -> site URL path
@@ -100,15 +101,11 @@ function rewriteLinks(text, file, repo) {
   });
 }
 
-for (const dir of ["haven/records", "elmos", "kdal"]) fs.rmSync(path.join(OUT, dir), { recursive: true, force: true });
+for (const dir of ["haven/records", "elmos", "kdal/records"]) fs.rmSync(path.join(OUT, dir), { recursive: true, force: true });
 for (const p of plan) {
   let text = fs.readFileSync(p.file, "utf8");
   text = frontMatter(text, path.basename(p.dest).replace(/\.mdx?$/, ""));
   if (!p.file.endsWith(".mdx")) text = rewriteLinks(text, p.file, p.repo);
-  // KDAL's pages come from its own Starlight site, where links are absolute
-  // from that site's root: move them under /kdal/.
-  if (p.repo === "kdal")
-    text = text.replace(/(\]\(|href="|link:\s*)\/(?!\/)/g, `$1${BASE}/kdal/`);
   const out = path.join(OUT, p.dest);
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, text);
