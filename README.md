@@ -11,7 +11,9 @@ Starlight site, one sidebar per project (`starlight-sidebar-topics`).
 | `src/content/docs/start/` | written here |
 | `src/content/docs/haven/` (overview, getting started, roadmap, porting, background) | written here; replaces the former `haven-wiki` repository and the former `haven/website` site |
 | `src/content/docs/haven/records/` | copied from the `haven` repository at build time (README, research records, read-back, related work, try, changelog) |
-| `src/content/docs/elmos/`, `kdal/` | copied from the `elmos` and `kdal` repositories at build time; the ELMOS command reference is generated from the code (`elmos gendocs`) |
+| `src/content/docs/kdal/` (overview, getting started, language, toolchain, kernel framework, development, reference) | written here; moved from the former `kdal/website` site on 2026-11-15 |
+| `src/content/docs/kdal/records/` | copied from the `kdal` repository at build time (README, changelog) |
+| `src/content/docs/elmos/` | copied from the `elmos` repository at build time; the ELMOS command reference is generated from the code (`elmos gendocs`) |
 
 `scripts/sync.mjs` does the copying: it adds front matter where a page has
 none and rewrites links (links between copied pages become site links,

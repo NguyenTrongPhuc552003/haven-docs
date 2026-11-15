@@ -1,8 +1,8 @@
 // HAVEN's official site, with the ELMOS and KDAL documentation.
-// HAVEN's own pages are written here (src/content/docs/haven/); pages that
-// belong to the code (README, records, changelog) and the ELMOS and KDAL
-// documentation are copied from the repositories at build time by
-// scripts/sync.mjs.
+// HAVEN's and KDAL's own pages are written here (src/content/docs/haven/,
+// src/content/docs/kdal/); pages that belong to the code (README, records,
+// changelog) and the ELMOS documentation are copied from the repositories
+// at build time by scripts/sync.mjs.
 import { defineConfig, passthroughImageService } from "astro/config";
 import starlight from "@astrojs/starlight";
 import starlightSidebarTopics from "starlight-sidebar-topics";
@@ -75,7 +75,16 @@ export default defineConfig({
             label: "KDAL",
             link: "/kdal/",
             icon: "puzzle",
-            items: [{ autogenerate: { directory: "kdal" } }],
+            items: [
+              "kdal",
+              { label: "Getting started", items: [{ autogenerate: { directory: "kdal/getting-started" } }] },
+              { label: "Language", items: [{ autogenerate: { directory: "kdal/language" } }] },
+              { label: "Toolchain", items: [{ autogenerate: { directory: "kdal/toolchain" } }] },
+              { label: "Kernel framework", items: [{ autogenerate: { directory: "kdal/kernel" } }] },
+              { label: "Development", collapsed: true, items: [{ autogenerate: { directory: "kdal/development" } }] },
+              { label: "Reference", collapsed: true, items: [{ autogenerate: { directory: "kdal/reference" } }] },
+              { label: "From the repository", collapsed: true, items: [{ autogenerate: { directory: "kdal/records" } }] },
+            ],
           },
         ]),
       ],
