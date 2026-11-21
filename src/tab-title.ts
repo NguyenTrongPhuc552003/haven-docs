@@ -15,7 +15,7 @@ const PROPER = new Set([
 	"Coq", "Isabelle", "Vietnam", "Sky1",
 ]);
 
-/** "ELMOS - Embedded Linux on macOS" -> "Elmos: embedded Linux on macOS" */
+/** "ELMOS - Embedded Linux on Multi-OS" -> "Elmos: embedded Linux on Multi-OS" */
 export function sentenceCase(title: string): string {
 	const words = title.replace(/\s+-\s+/g, ": ").split(/\s+/);
 	return words
