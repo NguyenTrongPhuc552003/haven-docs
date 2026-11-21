@@ -84,8 +84,8 @@ registers {
 
 | Qualifier | Meaning       | Generated C                                                   |
 | --------- | ------------- | ------------------------------------------------------------- |
-| `ro`      | Read-only     | `ioread32(base + offset)` - compiler rejects `reg_write`      |
-| `wo`      | Write-only    | `iowrite32(val, base + offset)` - compiler rejects `reg_read` |
+| `ro`      | Read-only     | `ioread32(base + offset)` - `kdality lint` warns on a `write` (W003) |
+| `wo`      | Write-only    | `iowrite32(val, base + offset)` - `kdality lint` warns on a `read` (W004) |
 | `rw`      | Read-write    | Both                                                          |
 | `rc`      | Clear-on-read | Read clears the register                                      |
 

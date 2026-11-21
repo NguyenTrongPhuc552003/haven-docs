@@ -5,8 +5,8 @@ title: Quick Start
 description: Write your first KDAL driver in 5 minutes.
 ---
 
-:::caution[Moved from the KDAL website]
-Moved from the former KDAL website (kdal/website) on 2026-11-15; not yet reviewed against the current code. KDAL's [README](../../records/readme/) and [changelog](../../records/changelog/) are copied from the repository at every build and are current.
+:::note[Reviewed 2026-11-21]
+Every command on this page was run in order on a fresh `kdality init` project (KDAL #39), and every code block passes `kdality lint` and `kdality simulate`.
 :::
 
 import { Steps, Aside } from "@astrojs/starlight/components";
@@ -26,7 +26,7 @@ from scratch.
 1. **Scaffold a new project:**
 
    ```sh
-   kdality init hello_led
+   kdality init hello_led --class gpio
    cd hello_led
    ```
 
@@ -34,11 +34,14 @@ from scratch.
 
    ```
    hello_led/
-   ├── hello_led.kdh     # Device header
-   ├── hello_led.kdc     # Driver code
-   ├── Makefile           # Build wrapper
-   └── README.md          # Notes
+   ├── hello_led.kdh          # Device header
+   ├── hello_led_driver.kdc   # Driver code
+   ├── Makefile               # make compile, make module
+   └── README.md              # Notes
    ```
+
+   The generated files already build: `make compile` works before you
+   change anything.
 
 2. **Edit the device header** (`hello_led.kdh`):
 
@@ -58,7 +61,7 @@ from scratch.
            toggle : in edge(rising);
        }
 
-       power_states {
+       power {
            on  : allowed;
            off : allowed;
            default : on;
@@ -66,81 +69,84 @@ from scratch.
    }
    ```
 
-3. **Implement the driver** (`hello_led.kdc`):
+3. **Implement the driver** (`hello_led_driver.kdc`). The header is
+   imported under a name (`LED`), and every register and signal is
+   reached through it:
 
    ```kdal
    kdal_version: "0.1";
 
-   use "hello_led.kdh";
+   import "hello_led.kdh" as LED;
 
-   driver HelloLedDriver for HelloLed {
+   driver HelloLedDriver for LED.HelloLed {
 
-       on probe {
-           reg_write(CTRL, 0x01);
-           log("LED driver initialized");
+       probe {
+           write(LED.CTRL, 0x01);
+           log("hello_led: initialized\n");
        }
 
-       on remove {
-           reg_write(CTRL, 0x00);
-           log("LED driver removed");
+       remove {
+           write(LED.CTRL, 0x00);
+           log("hello_led: removed\n");
        }
 
-       on read {
-           return reg_read(STATE);
+       on read(LED.STATE) {
+           wait(LED.toggle, 1000);
        }
 
-       on write {
-           reg_write(CTRL, input);
+       on write(LED.CTRL, val) {
+           write(LED.CTRL, val);
        }
 
-       on signal toggle {
-           let current = reg_read(STATE);
+       on signal(LED.toggle) {
+           let current = read(LED.STATE);
            if (current == 0x01) {
-               reg_write(CTRL, 0x00);
+               write(LED.CTRL, 0x00);
            } else {
-               reg_write(CTRL, 0x01);
+               write(LED.CTRL, 0x01);
            }
        }
 
-       on power off {
-           reg_write(CTRL, 0x00);
+       on power(on -> off) {
+           write(LED.CTRL, 0x00);
        }
 
-       on power on {
-           reg_write(CTRL, 0x01);
+       on power(off -> on) {
+           write(LED.CTRL, 0x01);
        }
    }
    ```
 
-4. **Lint the source:**
+4. **Lint the sources:**
 
    ```sh
-   kdality lint hello_led.kdc
+   kdality lint hello_led.kdh
+   kdality lint hello_led_driver.kdc
    ```
 
 5. **Compile to kernel C:**
 
    ```sh
-   kdality compile hello_led.kdc -o output/
+   make compile        # runs: kdality compile hello_led_driver.kdc -o output
    ```
 
    This produces:
 
-   - `output/hello_led.c` - complete kernel module source
+   - `output/HelloLedDriver.c` - the kernel module source (named after the driver)
    - `output/Makefile.kbuild` - Kbuild Makefile for `make modules`
 
 6. **Build the kernel module:**
 
    ```sh
-   make -C /path/to/kernel M=$(pwd)/output modules
+   make module KDIR=/path/to/kernel/build
    ```
 
-7. **Load on QEMU:**
+7. **Load it in QEMU:**
 
    ```sh
-   cp output/hello_led.ko /path/to/shared/
-   # Inside QEMU guest:
-   insmod /mnt/modules/hello_led.ko
+   cp output/HelloLedDriver.ko /path/to/shared/
+   # Inside the QEMU guest:
+   insmod /mnt/modules/HelloLedDriver.ko
    ```
 
 </Steps>
@@ -150,7 +156,7 @@ from scratch.
 You can dry-run your driver without building a kernel module:
 
 ```sh
-kdality simulate hello_led.kdc
+kdality simulate hello_led_driver.kdc
 ```
 
 This runs an interpreter that traces register reads/writes to stdout.
@@ -160,7 +166,7 @@ This runs an interpreter that traces register reads/writes to stdout.
 Auto-generate KUnit test stubs from your driver:
 
 ```sh
-kdality test-gen hello_led.kdc -o tests/
+kdality test-gen hello_led_driver.kdc -o tests/   # writes tests/test_HelloLedDriver.c
 ```
 
 ## Generating Device Tree Overlays
@@ -168,13 +174,14 @@ kdality test-gen hello_led.kdc -o tests/
 If your target uses Device Tree:
 
 ```sh
-kdality dt-gen hello_led.kdh -o dts/
+kdality dt-gen hello_led.kdh -o dts/       # writes dts/HelloLed.dtso
 ```
 
 <Aside type="note">
-  The compiler is at v0.1.0-alpha. Advanced `.kdc` syntax (import aliases, dotted
-  paths) is still being implemented. See the [Language Specification](../../language/spec/)
-  for the full grammar.
+  The compiler is at v0.1.0-alpha. `kdality compile` does not read the
+  imported header yet: register names reach the generated C as written, so
+  run `kdality lint`, which does read it. See the
+  [Language Specification](../../language/spec/) for the full grammar.
 </Aside>
 
 ## Next Steps

@@ -5,8 +5,8 @@ title: Driver Code (.kdc)
 description: Implementing driver behavior with event handlers.
 ---
 
-:::caution[Moved from the KDAL website]
-Moved from the former KDAL website (kdal/website) on 2026-11-15; not yet reviewed against the current code. KDAL's [README](../../records/readme/) and [changelog](../../records/changelog/) are copied from the repository at every build and are current.
+:::note[Reviewed 2026-11-21]
+Every code block on this page was run through `kdality simulate` and `kdality lint` (KDAL #39); the syntax is the grammar's ([Language Specification](../spec/)).
 :::
 
 A `.kdc` file implements driver behavior using event handlers. It imports
@@ -28,51 +28,54 @@ driver MyUartDriver for UART.UartDevice {
     config { … }
     probe  { … }
     remove { … }
-    on read  { … }
-    on write { … }
-    on signal <name> { … }
-    on power <state> { … }
+    on read(UART.DR) { … }
+    on write(UART.DR, val) { … }
+    on signal(UART.rx_ready) { … }
+    on power(on -> off) { … }
 }
 ```
 
 ## Example
 
+The device header is `uart.kdh` from the [standard library](../stdlib/)
+(device `UartDevice`: registers `DR` (data), `FR` (flags), `CR` (control); signal `rx_ready`):
+
 ```kdal
-// uart_hello.kdc - simple UART driver for PL011
+// uart_hello.kdc - a small UART driver
 
-use "uart.kdh";
+kdal_version: "0.1";
 
-driver uart_hello for uart {
+import "kdal/stdlib/uart.kdh" as UART;
 
-    on probe {
-        reg_write(CR, 0x301);    // enable TX, RX, UART
-        log("UART initialized");
+driver UartHello for UART.UartDevice {
+
+    probe {
+        write(UART.CR, 0x301);    // enable TX, RX, UART
+        log("uart_hello: initialized\n");
     }
 
-    on remove {
-        reg_write(CR, 0x00);     // disable UART
+    remove {
+        write(UART.CR, 0x00);     // disable the UART
     }
 
-    on read {
-        val = reg_read(DR);
-        return val;
+    on read(UART.DR) {
+        wait(UART.rx_ready, 1000);  // up to 1000 ms
     }
 
-    on write {
-        reg_write(DR, input);
+    on write(UART.DR, val) {
+        write(UART.DR, val);
     }
 
-    on signal rx_ready {
-        data = reg_read(DR);
-        log("RX data received");
+    on signal(UART.rx_ready) {
+        log("uart_hello: RX 0x%x\n", read(UART.DR));
     }
 
-    on power off {
-        reg_write(CR, 0x00);
+    on power(on -> off) {
+        write(UART.CR, 0x00);
     }
 
-    on power on {
-        reg_write(CR, 0x301);
+    on power(off -> on) {
+        write(UART.CR, 0x301);
     }
 }
 ```
@@ -94,13 +97,13 @@ The `backend` block declares the hardware transport:
 
 | Handler              | Kernel Equivalent       | When It Runs                       |
 | -------------------- | ----------------------- | ---------------------------------- |
-| `on probe`           | `.probe` callback       | Driver bound to device             |
-| `on remove`          | `.remove` callback      | Driver unbound                     |
-| `on read`            | `kdal_driver_ops.read`  | Userspace `read()` on `/dev/kdal`  |
-| `on write`           | `kdal_driver_ops.write` | Userspace `write()` on `/dev/kdal` |
-| `on signal <name>`   | IRQ handler             | Named signal fires                 |
-| `on power <state>`   | PM callback             | Power state transition             |
-| `on timeout <timer>` | Timer callback          | Armed timer fires                  |
+| `probe`                    | `.probe` callback       | Driver bound to device             |
+| `remove`                   | `.remove` callback      | Driver unbound                     |
+| `on read(DEV.REG)`         | `kdal_driver_ops.read`  | Userspace `read()` on `/dev/kdal`  |
+| `on write(DEV.REG, val)`   | `kdal_driver_ops.write` | Userspace `write()` on `/dev/kdal` |
+| `on signal(DEV.name)`      | IRQ handler             | The signal fires                   |
+| `on power(a -> b)`         | PM callback             | Power state transition             |
+| `on timeout(timer)`        | Timer callback          | Armed timer fires                  |
 
 ## Built-in Operations
 
@@ -108,8 +111,6 @@ The `backend` block declares the hardware transport:
 | ---------------------- | ---------------------------------------- |
 | `read(reg_path)`       | Returns register value as typed integer  |
 | `write(reg_path, val)` | Writes typed value to register           |
-| `reg_read(name)`       | Shorthand for reading a register by name |
-| `reg_write(name, val)` | Shorthand for writing a register by name |
 | `emit(signal [, val])` | Triggers an output signal                |
 | `wait(signal, ms)`     | Waits for a signal with timeout (ms)     |
 | `arm(timer, ms)`       | Starts a one-shot or periodic timer      |
@@ -133,7 +134,7 @@ for i in 0..8 {
     // bounded range - always terminates
 }
 
-let result = reg_read(STATUS);
+let result = read(DEV.STATUS);
 return result;
 ```
 
@@ -203,7 +204,7 @@ The compiler handles `platform_driver` boilerplate, OF match table,
 ## Scoping Rules
 
 - `.kdh` file defines a namespace equal to the import alias (or the device class name if no alias)
-- `ident.ident` - namespace member access (e.g., `UART.DATA`)
+- `ident.ident` - namespace member access (e.g., `UART.DR`)
 - `ident.ident.ident` - bitfield within register (e.g., `UART.CONTROL.enable`)
 - `let` bindings are local to the enclosing handler block
 - No global mutable variables

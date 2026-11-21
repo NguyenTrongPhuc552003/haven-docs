@@ -97,12 +97,15 @@ kdality simulate <file.kdc> [--trace] [--event <name>]
 | `--event` | `<name>` | Simulate a specific event handler  |
 
 The simulator maintains up to 64 virtual registers and prints each
-read/write operation:
+read/write operation, handler by handler (here the quickstart's driver,
+with `--trace`):
 
 ```
-[1] reg_write  STATUS  0x00000001
-[2] reg_read   DATA    => 0x000000FF
-[3] log        "probe complete"
+── Simulating: probe ──
+  [0] reg_write(CTRL, 0x1) [new]
+
+── Simulating: remove ──
+  [0] reg_write(CTRL, 0x0) [was 0x1]
 ```
 
 This is useful for newcomers to visualise driver behaviour before compiling

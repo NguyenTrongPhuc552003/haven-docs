@@ -5,8 +5,8 @@ title: Standard Library
 description: Pre-built device headers for common peripherals and accelerators.
 ---
 
-:::caution[Moved from the KDAL website]
-Moved from the former KDAL website (kdal/website) on 2026-11-15; not yet reviewed against the current code. KDAL's [README](../../records/readme/) and [changelog](../../records/changelog/) are copied from the repository at every build and are current.
+:::note[Reviewed 2026-11-21]
+Every code block on this page was run through `kdality simulate` and `kdality lint` (KDAL #39); the syntax is the grammar's ([Language Specification](../spec/)).
 :::
 
 The KDAL standard library ships 7 `.kdh` files covering common device classes.
@@ -27,22 +27,35 @@ These files live in `lang/stdlib/` and are installed to
 
 ## Using Standard Library Headers
 
-Import a standard library header in your `.kdc` file:
+Import a standard library header by its `kdal/stdlib/` path and give it
+a name; the device class inside `uart.kdh` is `UartDevice`:
 
 ```kdal
-use "uart.kdh";
+kdal_version: "0.1";
 
-driver MyUartDriver for uart {
-    on probe {
-        reg_write(CR, 0x301);
+import "kdal/stdlib/uart.kdh" as UART;
+
+driver MyUartDriver for UART.UartDevice {
+    probe {
+        write(UART.CR, 0x301);
+    }
+
+    remove {
+        write(UART.CR, 0x00);
     }
 }
 ```
 
-The compiler searches for `.kdh` files in:
-1. The current directory
-2. `$KDAL_HOME/share/kdal/stdlib/`
-3. Paths specified via `-I` flag
+Where the header is found:
+
+- `kdality lint` reads it (for register checks) next to the `.kdc` first;
+  a `kdal/stdlib/` path then in `$KDAL_STDLIB_DIR`, the installed standard
+  library (`<prefix>/share/kdal/stdlib/`) and a source tree's
+  `lang/stdlib/`. A header it cannot find is error E002.
+- `kdality compile` does not read imported headers today: register names
+  pass to the generated C as written (`ctx->regs.CR`), so a misspelt
+  register is caught by `lint` (W007 on the header, no access to the
+  name) or by the C compiler, not by `kdalc`.
 
 ## Creating Custom Device Headers
 
@@ -67,10 +80,10 @@ device class MyDevice {
 }
 ```
 
-Then reference it from your `.kdc`:
+Then import it from your `.kdc`, next to it:
 
 ```kdal
-use "mydevice.kdh";
+import "mydevice.kdh" as DEV;
 ```
 
 ## Extending the Standard Library
@@ -78,7 +91,7 @@ use "mydevice.kdh";
 To contribute a new standard library device:
 
 1. Create `lang/stdlib/<device>.kdh`
-2. Define `device class`, `register_map`, `signals`, `capabilities`, `power_states`
+2. Define `device class` with `registers` (or the simplified `register_map`), `signals`, `capabilities` and `power` (or `power_states`)
 3. Follow existing patterns - `uart.kdh` is the reference
 4. Create a matching example `.kdc` in `examples/`
 5. Submit a pull request
