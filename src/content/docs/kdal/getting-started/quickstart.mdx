@@ -6,7 +6,7 @@ description: Write your first KDAL driver in 5 minutes.
 ---
 
 :::note[Reviewed 2026-11-21]
-Every command on this page was run in order on a fresh `kdality init` project (KDAL #39), and every code block passes `kdality lint` and `kdality simulate`.
+Every command on this page was run in order on a fresh `kdality init` project (KDAL #39), and every code block passes `kdality lint` and `kdality simulate`; steps 6 and 7 fail today (see the caution there).
 :::
 
 import { Steps, Aside } from "@astrojs/starlight/components";
@@ -136,6 +136,16 @@ from scratch.
    - `output/Makefile.kbuild` - Kbuild Makefile for `make modules`
 
 6. **Build the kernel module:**
+
+   <Aside type="caution" title="Not working yet">
+     Steps 6 and 7 do not work today. The generated C includes
+     `<linux/kdal.h>`, which KDAL does not provide, and calls a register
+     API that KDAL's module does not export; against Linux 6.18 the build
+     stops at `'linux/kdal.h' file not found` (KDAL
+     `docs/open-findings-20261121.md`, findings F1 and F4). Steps 1 to 5,
+     simulation, test generation and device-tree overlays work.
+   </Aside>
+
 
    ```sh
    make module KDIR=/path/to/kernel/build
