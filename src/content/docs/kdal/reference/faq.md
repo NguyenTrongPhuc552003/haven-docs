@@ -128,7 +128,7 @@ programmers can focus on driver logic rather than kernel API minutiae.
 ### Can I write a driver without knowing C?
 
 Yes - that is the goal. A `.kdc` file uses high-level constructs like
-`on probe`, `on read`, and `reg_write(CTRL, 0x01)`. The compiler generates
+`probe { ... }`, `on read(DEV.DATA) { ... }` and `write(DEV.CTRL, 0x01)`. The compiler generates
 all the C code needed for a loadable kernel module.
 
 ### How do I create a custom device header?
