@@ -52,29 +52,24 @@ This keeps the generated code auditable and eliminates entire classes of kernel 
 
 ## Compilation Flow
 
+```mermaid
+flowchart LR
+  SRC[/".kdc driver<br/>importing .kdh headers"/]
+  READ["Read<br/>source.c"]
+  LEX["Lexer<br/>lexer.c<br/>characters to tokens"]
+  PARSE["Parser<br/>parser.c<br/>recursive descent, tokens to AST"]
+  SEMA["Semantic analysis<br/>sema.c<br/>types, register access,<br/>scopes, backends"]
+  GEN["Codegen<br/>codegen.c<br/>AST to C"]
+  OUT[/".c and Makefile.kbuild"/]
+  KO[/"kbuild: .ko<br/>fails today: open finding O7"/]
+  SRC --> READ --> LEX --> PARSE --> SEMA --> GEN --> OUT --> KO
+  classDef observed stroke:#0ca30c,stroke-width:2px
+  class READ,LEX,PARSE,SEMA,GEN observed
 ```
-.kdc file
-       │
-       ▼
-┌─────────────┐
-│   Lexer     │  characters → token stream
-└──────┬──────┘
-       ▼
-┌─────────────┐
-│   Parser    │  tokens → AST (recursive descent)
-└──────┬──────┘
-       ▼
-┌─────────────┐
-│  Semantic   │  type checking, register access
-│  Analysis   │  verification, scope resolution
-└──────┬──────┘
-       ▼
-┌─────────────┐
-│   Codegen   │  AST → .c + Makefile.kbuild
-└──────┬──────┘
-       ▼
-   kbuild → .ko
-```
+
+The same diagram as KDAL's `lang/DESIGN.md`: the five phases run
+(`kdality compile` succeeds on every example); the generated module does
+not build yet (finding O7 in KDAL's `docs/open-findings-20261121.md`).
 
 ## Comparison with Alternatives
 

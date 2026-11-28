@@ -20,9 +20,9 @@ const BASE = (process.env.DOCS_BASE ?? (process.env.VERCEL ? "" : "/haven-docs")
 const OWNER = "https://github.com/NguyenTrongPhuc552003";
 
 // [repo, source path (file or dir), site dir or file]
-// HAVEN's and KDAL's hand-written pages live in this repository under
-// src/content/docs/haven/ and src/content/docs/kdal/; only the pages that
-// belong to the code are copied, into haven/records/ and kdal/records/.
+// The three overview pages (haven/, elmos/, kdal/index.mdx) and HAVEN's and
+// KDAL's other hand-written pages live in this repository; only the pages
+// that belong to the code are copied, into the directories below.
 const MAP = [
   ["haven", "README.md", "haven/records/readme.md"],
   ["haven", "scripts/release/try/README.md", "haven/records/try.md"],
@@ -30,7 +30,8 @@ const MAP = [
   ["haven", "docs/research/related-work.md", "haven/records/related-work.md"],
   ["haven", "docs/README.md", "haven/records/research-records.md"],
   ["haven", "CHANGELOG.md", "haven/records/changelog.md"],
-  ["elmos", "README.md", "elmos/index.md"],
+  ["haven", "docs/diagrams", "haven/diagrams"],
+  ["elmos", "README.md", "elmos/records/readme.md"],
   ["elmos", "docs/user", "elmos/guide"],
   ["elmos", "docs/developer", "elmos/developer"],
   ["kdal", "README.md", "kdal/records/readme.md"],
@@ -65,7 +66,8 @@ for (const [repo, src, dest] of MAP) {
   }
   if (fs.statSync(abs).isDirectory()) {
     for (const f of listFiles(abs)) {
-      const rel = path.relative(abs, f).toLowerCase();
+      // a directory's README.md becomes its index page
+      const rel = path.relative(abs, f).toLowerCase().replace(/(^|\/)readme\.md$/, "$1index.md");
       plan.push({ repo, file: f, dest: path.join(dest, rel) });
     }
   } else {
@@ -101,7 +103,7 @@ function rewriteLinks(text, file, repo) {
   });
 }
 
-for (const dir of ["haven/records", "elmos", "kdal/records"]) fs.rmSync(path.join(OUT, dir), { recursive: true, force: true });
+for (const dir of ["haven/records", "haven/diagrams", "elmos/guide", "elmos/developer", "elmos/reference", "elmos/records", "kdal/records", "elmos/index.md"]) fs.rmSync(path.join(OUT, dir), { recursive: true, force: true });
 for (const p of plan) {
   let text = fs.readFileSync(p.file, "utf8");
   text = frontMatter(text, path.basename(p.dest).replace(/\.mdx?$/, ""));

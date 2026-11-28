@@ -47,14 +47,24 @@ The compiler produces two files in the output directory:
 `kdalc` implements a four-stage pipeline with **zero external dependencies** -
 no lex/yacc, no LLVM, just portable C99.
 
+```mermaid
+flowchart LR
+  SRC[/".kdc driver<br/>importing .kdh headers"/]
+  READ["Read<br/>source.c"]
+  LEX["Lexer<br/>lexer.c<br/>characters to tokens"]
+  PARSE["Parser<br/>parser.c<br/>recursive descent, tokens to AST"]
+  SEMA["Semantic analysis<br/>sema.c<br/>types, register access,<br/>scopes, backends"]
+  GEN["Codegen<br/>codegen.c<br/>AST to C"]
+  OUT[/".c and Makefile.kbuild"/]
+  KO[/"kbuild: .ko<br/>fails today: open finding O7"/]
+  SRC --> READ --> LEX --> PARSE --> SEMA --> GEN --> OUT --> KO
+  classDef observed stroke:#0ca30c,stroke-width:2px
+  class READ,LEX,PARSE,SEMA,GEN observed
 ```
-┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│  Lexer   │───>│  Parser  │───>│   Sema   │───>│ Codegen  │
-│          │    │          │    │          │    │          │
-│ Source → │    │ Tokens → │    │ AST →    │    │ AST →    │
-│ Tokens   │    │ AST      │    │ Checked  │    │ C + Make │
-└──────────┘    └──────────┘    └──────────┘    └──────────┘
-```
+
+The same diagram as KDAL's `lang/DESIGN.md`: the five phases run
+(`kdality compile` succeeds on every example); the generated module does
+not build yet (finding O7 in KDAL's `docs/open-findings-20261121.md`).
 
 ### Stage 1 - Lexer
 
