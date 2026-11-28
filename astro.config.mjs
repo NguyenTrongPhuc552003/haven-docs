@@ -6,6 +6,8 @@
 import { defineConfig, passthroughImageService } from "astro/config";
 import starlight from "@astrojs/starlight";
 import starlightSidebarTopics from "starlight-sidebar-topics";
+import { satteri } from "@astrojs/markdown-satteri";
+import { mermaidBlocks } from "./src/mermaid-blocks.mjs";
 
 // Vercel (production) serves the site at the root of its domain; the
 // GitHub Pages fallback serves it under /haven-docs.
@@ -18,6 +20,8 @@ export default defineConfig({
   base: BASE,
   // no image optimisation: avoids sharp's native install step
   image: { service: passthroughImageService() },
+  // ```mermaid blocks become diagrams (src/mermaid-blocks.mjs, src/mermaid.ts)
+  markdown: { processor: satteri({ hastPlugins: [mermaidBlocks] }) },
   integrations: [
     starlight({
       title: "Haven",
@@ -32,7 +36,10 @@ export default defineConfig({
       routeMiddleware: "./src/route-data.ts",
       customCss: ["./src/styles/starlight.css"],
       // one light/dark button next to the GitHub icon instead of the select
-      components: { ThemeSelect: "./src/components/ThemeToggle.astro" },
+      components: {
+        ThemeSelect: "./src/components/ThemeToggle.astro",
+        MarkdownContent: "./src/components/MarkdownContent.astro",
+      },
       editLink: { baseUrl: "https://github.com/NguyenTrongPhuc552003/haven-docs/edit/main/" },
       description:
         "An ARM64 static-partitioning hypervisor with enforcement read-back, a macOS embedded-Linux workbench, and a device abstraction layer: documentation.",

@@ -39,3 +39,26 @@
 .sl-markdown-content table {
 	font-size: var(--sl-text-sm);
 }
+
+/* Mermaid diagrams (src/mermaid.ts): a card in the page's colours. Before
+ * the diagram is drawn, or if it cannot be, its source text is shown. */
+.hv-mermaid {
+	margin: 1.5rem 0;
+	padding: 1rem;
+	overflow-x: auto;
+	background: var(--hv-surface);
+	border: 1px solid var(--hv-border);
+	border-radius: var(--hv-radius);
+	text-align: center;
+}
+.hv-mermaid:not([data-drawn]) {
+	white-space: pre;
+	text-align: start;
+	font-family: var(--hv-mono);
+	font-size: var(--sl-text-xs);
+	color: var(--hv-muted);
+}
+.hv-mermaid svg {
+	max-width: 100%;
+	height: auto;
+}
