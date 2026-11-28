@@ -1,0 +1,66 @@
+---
+title: ELMOS
+description: Embedded Linux on Multi-OS - an embedded Linux workbench for the laptop you already have.
+sidebar:
+  order: 0
+  label: Overview
+---
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+**Embedded Linux on Multi-OS.** ELMOS builds Linux kernels, kernel modules,
+user-space apps and root file systems with native cross toolchains
+(crosstool-ng), and runs them in QEMU with GDB, without Docker or a VM. In
+this ecosystem it also runs HAVEN and KDAL with one command
+(`elmos demo haven`, `elmos demo linux`). The repository is the source of
+truth: its [README](records/readme/), [guide](guide/) and
+[developer pages](developer/) are copied from it on every build of this
+site.
+
+## At a glance
+
+{/* Summary of ELMOS's docs/developer/diagrams.md, "Deployment"; keep in step. */}
+
+```mermaid
+flowchart TB
+  subgraph host["Your machine"]
+    bin["elmos CLI and TUI"]
+    vol["Workspace volume<br/>kernel source, toolchains,<br/>root file system"]
+    cache[("demo cache<br/>~/.elmos/demo")]
+    proj["examples/modules/<br/>in the project"]
+  end
+  subgraph vm["QEMU virt machine"]
+    kernel["Linux kernel"]
+    rootfs["root file system"]
+    mods["your modules (9p share)"]
+  end
+  rel[("GitHub releases<br/>HAVEN and Linux demos")]
+  bin --> vol
+  bin -->|launches| vm
+  vol -->|kernel image| kernel
+  vol -->|disk.img| rootfs
+  proj -->|virtio-9p| mods
+  rel -->|checked by SHA-256| cache
+  cache --> vm
+  classDef observed stroke:#0ca30c,stroke-width:2px
+  class bin,vol,cache,proj,kernel,rootfs,mods observed
+```
+
+More: the [architecture diagrams](developer/diagrams/) (packages, kernel
+build, the HAVEN demo, types, workspace states).
+
+## Start here
+
+<CardGrid>
+  <LinkCard title="Try it" href="records/readme/#try-it-first-no-kernel-build-no-sudo" description="Run the Linux or HAVEN demo: no kernel build, no sudo." />
+  <LinkCard title="Diagrams" href="developer/diagrams/" description="Packages, workflows and the workspace, checked against the code." />
+  <LinkCard title="Command reference" href="reference/cli/elmos/" description="Every command, generated from the code." />
+  <LinkCard title="From the repository" href="records/readme/" description="README, guide, developer pages and changelog." />
+</CardGrid>
+
+## Where it stands
+
+| Host | State |
+| - | - |
+| macOS | The full workflow |
+| Linux, Windows | The CLI builds and its tests pass in CI on every change; the prebuilt Linux demo boots on all three hosts every week (on Windows without the KDAL module, which needs virtio-9p); the rest of the workflow is the project's direction |

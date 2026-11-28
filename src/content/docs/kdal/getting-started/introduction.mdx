@@ -68,27 +68,29 @@ kernel module in C, ready to build with `make modules`.
 
 ## Architecture at a Glance
 
+```mermaid
+flowchart TB
+  US["User space<br/>kdality (CLI), testapp and benchmark (tests/userspace),<br/>kdaltest (tests/integration)<br/>(implemented)"]
+  CP["Control plane: src/core/<br/>chardev.c: /dev/kdal, ioctl dispatch<br/>debugfs.c: introspection and the demand report"]
+  CORE["Core runtime: src/core/<br/>registry, event, power, demand, kdal, module"]
+  DRV["Example drivers: src/drivers/example/<br/>uart, i2c, spi, gpu (accelerator ops)"]
+  BE["Backends: src/backends/<br/>generic: devicetree, platdev, socglue<br/>qemu: qemubackend, virtioio, virtioaccel, mmio"]
+  HW["Devices: MMIO, platform devices,<br/>device tree nodes, virtio"]
+  US -->|ioctl, read, write| CP
+  CP --> CORE
+  CORE --> DRV
+  DRV --> BE
+  BE --> HW
+  classDef observed stroke:#0ca30c,stroke-width:2px
+  classDef implemented stroke:#fab219,stroke-width:2px
+  class CP,CORE,DRV,BE observed
+  class US implemented
 ```
-┌────────────────────────────────────────────┐
-│          Language Toolchain (kdalc)        │
-│  .kdh → .kdc → lexer → parser → codegen    │
-├────────────────────────────────────────────┤
-│            Userspace Applications          │
-│      (kdality CLI, testapp, benchmarks)    │
-├────────────────────────────────────────────┤
-│          /dev/kdal (char device)           │
-│     ioctl: version, list, info, power      │
-├────────────────────────────────────────────┤
-│              KDAL Core Runtime             │
-│  registry · event bus · power manager      │
-├────────────────────────────────────────────┤
-│             Backend Adapters               │
-│  QEMU │ MMIO │ Platform │ DeviceTree       │
-├────────────────────────────────────────────┤
-│              Device Drivers                │
-│  UART │ I2C │ SPI │ GPIO │ GPU             │
-└────────────────────────────────────────────┘
-```
+
+The same diagram as KDAL's README (key: Start here, Reading the
+diagrams): green parts are built into `kdal.ko`, which CI loads and tests with its
+KUnit suites; the user-space programs build, but CI does not run them
+against the module.
 
 ## Target Platforms
 

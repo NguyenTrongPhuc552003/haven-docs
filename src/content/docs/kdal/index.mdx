@@ -19,7 +19,54 @@ Start with the [introduction](getting-started/introduction/), then
 [install](getting-started/installation/) it; the source is on
 [GitHub](https://github.com/NguyenTrongPhuc552003/kdal).
 
-import { Card, CardGrid } from "@astrojs/starlight/components";
+import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+## At a glance
+
+{/* The same diagram as KDAL's README; keep in step with it. */}
+
+```mermaid
+flowchart TB
+  US["User space<br/>kdality (CLI), testapp and benchmark (tests/userspace),<br/>kdaltest (tests/integration)<br/>(implemented)"]
+  CP["Control plane: src/core/<br/>chardev.c: /dev/kdal, ioctl dispatch<br/>debugfs.c: introspection and the demand report"]
+  CORE["Core runtime: src/core/<br/>registry, event, power, demand, kdal, module"]
+  DRV["Example drivers: src/drivers/example/<br/>uart, i2c, spi, gpu (accelerator ops)"]
+  BE["Backends: src/backends/<br/>generic: devicetree, platdev, socglue<br/>qemu: qemubackend, virtioio, virtioaccel, mmio"]
+  HW["Devices: MMIO, platform devices,<br/>device tree nodes, virtio"]
+  US -->|ioctl, read, write| CP
+  CP --> CORE
+  CORE --> DRV
+  DRV --> BE
+  BE --> HW
+  classDef observed stroke:#0ca30c,stroke-width:2px
+  classDef implemented stroke:#fab219,stroke-width:2px
+  class CP,CORE,DRV,BE observed
+  class US implemented
+```
+
+The same diagram as KDAL's README (key: Start here, Reading the
+diagrams): green parts are built into `kdal.ko`, which CI loads and tests with its
+KUnit suites; the user-space programs build, but CI does not run them
+against the module.
+
+## Start here
+
+<CardGrid>
+  <LinkCard title="Try it" href="getting-started/quickstart/" description="Describe a device, write a driver, build the module." />
+  <LinkCard title="Diagrams" href="kernel/architecture/" description="The module's layers and the compiler pipeline." />
+  <LinkCard title="Language reference" href="language/spec/" description="The .kdh and .kdc languages." />
+  <LinkCard title="From the repository" href="records/readme/" description="README and changelog, copied at every build." />
+</CardGrid>
+
+## Where it stands
+
+| Part | State |
+| - | - |
+| Kernel module (`src/`, `include/`) and the `kdality` CLI | Active: the device-access driver inside HAVEN's Linux partition |
+| Language, `kdalc` compiler, editor plugins | Frozen since 2026-11-01: kept, still built and checked by CI |
+
+
+## What it offers
 
 <CardGrid>
     <Card title="Declarative Device Headers" icon="document">
@@ -40,28 +87,6 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
         test-gen), VS Code extension, Vim plugin - everything you need.
     </Card>
 </CardGrid>
-
-## Architecture
-
-```
-┌─────────────────────────────────────────┐
-│           Userspace (ioctl)             │
-├─────────────────────────────────────────┤
-│  chardev · debugfs · Control Plane      │
-├─────────────────────────────────────────┤
-│       Core Runtime (registry,           │
-│       event bus, power manager)         │
-├─────────────────────────────────────────┤
-│  Backend Adapters                       │
-│  (QEMU │ MMIO │ Platform │ DeviceTree)  │
-├─────────────────────────────────────────┤
-│       Device Drivers                    │
-│  (UART │ I2C │ SPI │ GPU │ NPU)         │
-├─────────────────────────────────────────┤
-│  KDAL Language Toolchain                │
-│  (.kdh/.kdc → kdalc → kernel module)    │
-└─────────────────────────────────────────┘
-```
 
 ## Quick Install
 

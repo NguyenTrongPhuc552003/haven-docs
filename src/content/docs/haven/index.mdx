@@ -6,6 +6,8 @@ sidebar:
   label: Overview
 ---
 
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
 > **Hypervisor for Asymmetric Virtualization ENforcement and isolation**.
 > Master's thesis artifact, Computer Engineering (UIT), defense planned
 > around mid-2028.
@@ -27,6 +29,42 @@ The repository is the source of truth: the
 [README](records/readme/) and the
 [research records](records/research-records/) are copied from it on every
 build of this site.
+
+## At a glance
+
+{/* Summary of HAVEN's docs/diagrams/01 and 06; keep in step with them. */}
+
+```mermaid
+flowchart TB
+  G[/"grant (JSON)<br/>approved by the owner"/]
+  subgraph Q["QEMU virt today; a CIX P1 board later"]
+    HV["HAVEN at EL2 (trusted)<br/>stage-2, GIC, SMMU, timer"]
+    PA["Partition A (EL1)<br/>Linux or the test guest"]
+    PB["Partition B (EL1)<br/>bare-metal guest on CPU 2"]
+  end
+  RB["read-back<br/>outside HAVEN"]
+  F(["findings: where the hardware<br/>enforces something else"])
+  G -.->|HAVEN's tables written to match| HV
+  HV -->|enforces| PA
+  HV -->|enforces| PB
+  HV -.->|enforced state| RB
+  G --> RB
+  RB --> F
+  classDef observed stroke:#0ca30c,stroke-width:2px
+  class HV,PA,PB,RB observed
+```
+
+More: the [architecture diagrams](diagrams/) (layers, boot, faults, CPUs,
+KDAL's demand, the evaluation campaign).
+
+## Start here
+
+<CardGrid>
+  <LinkCard title="Try it" href="records/try/" description="Run HAVEN and read-back in QEMU from a prebuilt release." />
+  <LinkCard title="Diagrams" href="diagrams/" description="What runs where, how it boots, how it is evaluated." />
+  <LinkCard title="Read-back" href="records/read-back/" description="The tool that compares the hardware's state with the grant." />
+  <LinkCard title="From the repository" href="records/research-records/" description="Dated research records, README and changelog." />
+</CardGrid>
 
 ## Working research question
 
